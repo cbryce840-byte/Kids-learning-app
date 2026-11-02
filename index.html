@@ -1,1 +1,324 @@
-Hello
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dino & Spider Learning Academy</title>
+    <style>
+        :root {
+            --primary-dino: #2e7d32;
+            --primary-spider: #c62828;
+            --accent-web: #eceff1;
+            --background-dark: #1a237e;
+            --card-bg: #ffffff;
+            --text-dark: #263238;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: linear-gradient(135deg, #111, #222); color: var(--text-dark); min-height: 100vh; display: flex; flex-direction: column; -webkit-user-select: none; user-select: none; }
+        header { background-color: rgba(0,0,0,0.8); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid var(--primary-dino); }
+        .score-badge { background: #ffd700; color: black; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 1.1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+        .timer-badge { background: #0288d1; color: white; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 1rem; }
+        .btn-settings { background: none; border: none; font-size: 1.8rem; cursor: pointer; color: white; transition: transform 0.2s; }
+        .btn-settings:hover { transform: rotate(45deg); }
+        .main-container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px; position: relative; }
+        .screen { display: none; width: 100%; max-width: 800px; background: var(--card-bg); border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 5px solid var(--primary-dino); animation: fadeIn 0.3s ease-in-out; text-align: center; }
+        .screen.active { display: block; }
+        h1 { color: var(--primary-dino); margin-bottom: 10px; font-size: 2.2rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-top: 25px; }
+        .menu-card { background: #f5f5f5; border: 3px solid #ddd; border-radius: 15px; padding: 20px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
+        .menu-card:hover { transform: translateY(-5px); border-color: var(--primary-dino); background: #e8f5e9; box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
+        .menu-card.spider-theme:hover { border-color: var(--primary-spider); background: #ffebee; }
+        .menu-card .icon { font-size: 3.5rem; }
+        .menu-card span { font-weight: bold; font-size: 1.2rem; color: #333; }
+        .option-tile { background: #fff; border: 3px solid #90caf9; border-radius: 12px; padding: 15px 25px; font-size: 1.3rem; font-weight: bold; cursor: pointer; margin: 10px; transition: all 0.1s; display: inline-block; min-width: 130px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .option-tile:hover { background: #e3f2fd; transform: scale(1.05); }
+        .display-box { background: #fffde7; border: 3px dashed #fbc02d; border-radius: 15px; padding: 25px; margin: 20px 0; font-size: 1.6rem; font-weight: bold; min-height: 100px; display: flex; justify-content: center; align-items: center; color: #424242; line-height: 1.5; }
+        .feedback { font-size: 1.5rem; font-weight: bold; margin: 15px 0; min-height: 35px; border-radius: 8px; padding: 5px; }
+        .feedback.correct { color: #2e7d32; background-color: #e8f5e9; animation: bounce 0.5s; }
+        .feedback.wrong { color: #c62828; background-color: #ffebee; }
+        .rule-box { background: #e1f5fe; border-left: 8px solid #0288d1; padding: 15px; border-radius: 0 12px 12px 0; text-align: left; margin: 15px 0; font-size: 1.1rem; line-height: 1.4; display: none; }
+        .btn-action { background: var(--primary-dino); color: white; border: none; padding: 12px 30px; font-size: 1.1rem; font-weight: bold; border-radius: 10px; cursor: pointer; margin-top: 15px; text-transform: uppercase; letter-spacing: 1px; transition: background 0.2s; }
+        .btn-action:hover { background: #1b5e20; }
+        .btn-leave { background: #78909c; margin-left: 10px; }
+        .btn-leave:hover { background: #546e7a; }
+        .form-group { text-align: left; margin-bottom: 20px; }
+        label { display: block; font-weight: bold; margin-bottom: 8px; color: #37474f; font-size: 1.1rem; }
+        input[type="text"], input[type="number"] { width: 100%; padding: 12px; border: 2px solid #b0bec5; border-radius: 8px; font-size: 1.1rem; outline: none; transition: border-color 0.2s; }
+        input[type="text"]:focus, input[type="number"]:focus { border-color: var(--primary-dino); }
+        .lock-screen { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(26,35,126,0.98); color:white; display:none; flex-direction:column; justify-content:center; align-items:center; z-index:9999; border-radius:15px; padding: 40px; text-align: center; }
+        .lock-screen h2 { font-size: 3rem; margin-bottom: 20px; color: #fff; }
+        .lock-screen p { font-size: 1.5rem; margin-bottom: 30px; opacity: 0.9; }
+        .lock-screen .sleeping-icon { font-size: 8rem; margin-bottom: 20px; animation: float 3s ease-in-out infinite; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        @keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="timer-badge" id="timerDisplay">⏳ 30:00</div>
+        <div class="score-badge" id="totalScore">Stars: 0 ⭐</div>
+        <button class="btn-settings" onclick="openParentGate()" title="Parent Settings">⚙️</button>
+    </header>
+
+    <div class="main-container">
+        <!-- Lock Screen for Timer Expiry -->
+        <div class="lock-screen" id="lockscreen">
+            <div class="sleeping-icon">💤🦖🕷️</div>
+            <h2>Rest Time for the Creatures!</h2>
+            <p>The dinosaurs and spiders are taking a peaceful nap in their caves. Come back later to play and learn more with them!</p>
+        </div>
+
+        <!-- Main Menu -->
+        <div class="screen active" id="screen-menu">
+            <h1>🦖 DINO-SPIDER ACADEMY 🕷️</h1>
+            <p>Welcome, Explorer! Pick a path below to start your dino-spider learning quest!</p>
+            
+            <div class="menu-grid">
+                <div class="menu-card spider-theme" onclick="startPrepositions()">
+                    <div class="icon">🕷️</div>
+                    <span>Preposition Quest</span>
+                </div>
+                <div class="menu-card" onclick="startSentenceBuilding()">
+                    <div class="icon">Rex</div>
+                    <span>Sentence Builder</span>
+                </div>
+                <div class="menu-card spider-theme" onclick="startSpelling()">
+                    <div class="icon">🕸️</div>
+                    <span>Spelling Cave</span>
+                </div>
+                <div class="menu-card" onclick="startMaths()">
+                    <div class="icon">🔢</div>
+                    <span>Dino Math Rocks</span>
+                </div>
+                <div class="menu-card spider-theme" onclick="startCapitalisation()">
+                    <div class="icon">🔤</div>
+                    <span>Capital Letters</span>
+                </div>
+                <div class="menu-card" onclick="startManners()">
+                    <div class="icon">🤝</div>
+                    <span>Kind Manners Zoo</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Parent Gate Screen -->
+        <div class="screen" id="screen-parent-gate">
+            <h1>Parents Only Room 🔒</h1>
+            <p style="margin-bottom:20px;">Please solve this equation to verify you are a grown-up:</p>
+            <div class="display-box" id="gateMathProblem">6 + 4 = ?</div>
+            <input type="number" id="gateAnswer" placeholder="Enter answer" style="width:200px; margin-bottom:20px; text-align:center;">
+            <br>
+            <button class="btn-action" onclick="verifyParentGate()">Unlock Dashboard</button>
+            <button class="btn-action btn-leave" onclick="showScreen('screen-menu')">Cancel</button>
+        </div>
+
+        <!-- Parent Dashboard -->
+        <div class="screen" id="screen-parent-dashboard">
+            <h1>Parent Control Center 🛠️</h1>
+            
+            <div class="form-group">
+                <label for="screenTimeInput">Set Screen Time Limit (Minutes):</label>
+                <input type="number" id="screenTimeInput" placeholder="30" value="30">
+                <button class="btn-action" onclick="saveTimerSetting()" style="margin-top:10px;">Update Timer</button>
+            </div>
+
+            <hr style="margin:20px 0; border: 1px solid #ccc;">
+
+            <h3>Add Custom Spelling Words</h3>
+            <div class="form-group" style="margin-top:10px;">
+                <label>Word (e.g., spider):</label>
+                <input type="text" id="customWord" placeholder="Enter word" style="margin-bottom:15px;">
+                <label>Sentence with blank space (use standard underscore _ for the gap):</label>
+                <input type="text" id="customSentence" placeholder="The _ is crawling up.">
+                <button class="btn-action" onclick="saveCustomWord()" style="margin-top:10px;">Add to Spelling Cave</button>
+            </div>
+
+            <button class="btn-action btn-leave" onclick="showScreen('screen-menu')" style="margin-top:20px;">Go to Main Menu</button>
+        </div>
+
+        <!-- Game Active Area -->
+        <div class="screen" id="screen-game">
+            <h2 id="gameInstruction" style="color:var(--primary-dino); margin-bottom:10px;">Task Instructions</h2>
+            
+            <div class="rule-box" id="ruleReminderBox">
+                💡 <strong>Rule Reminder!</strong>
+                <p id="ruleText"></p>
+            </div>
+
+            <div class="display-box" id="gameDisplayBox">Question Text Goes Here</div>
+            <div id="gameFeedback" class="feedback"></div>
+            <div id="gameOptions"></div>
+
+            <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;">
+                <span id="gameProgress" style="font-weight:bold; color:#555;">Task 1 of 10</span>
+                <span id="gameScore" style="font-weight:bold; color:var(--primary-dino);">Score: 0 ⭐</span>
+                <button class="btn-action btn-leave" onclick="showScreen('screen-menu')">Leave Activity</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let totalStars = 0;
+        let timeRemaining = 30 * 60;
+        let timerInterval = null;
+        let currentModule = '';
+        let currentQuestionIdx = 0;
+        let currentModuleScore = 0;
+        let moduleQuestions = [];
+
+        const prepositionsBank = [
+            { q: "The friendly T-Rex is hiding _______ the big jungle tree.", a: "behind", options: ["behind", "under", "inside"] },
+            { q: "The tiny spider crawled _______ the dinosaur's smooth egg.", a: "over", options: ["over", "under", "through"] },
+            { q: "The raptor safely rests _______ his warm nesting cave.", a: "inside", options: ["inside", "on", "between"] },
+            { q: "A jumping spider landed right _______ the triceratops' nose!", a: "on", options: ["on", "under", "behind"] },
+            { q: "The long-neck dino walks _______ the deep blue river streams.", a: "through", options: ["through", "above", "under"] },
+            { q: "A shiny green spider spins its web _______ two massive rocks.", a: "between", options: ["between", "on", "into"] },
+            { q: "The baby dinosaur sleeps quietly _______ its mother's wing.", a: "under", options: ["under", "over", "above"] },
+            { q: "The pterodactyl flies high _______ the smoky volcano crest.", a: "above", options: ["above", "into", "on"] },
+            { q: "The spider dropped down safely _______ its long silky thread line.", a: "from", options: ["from", "through", "on"] },
+            { q: "Look! The stegosaurus safely steps _______ the soft swamp grass.", a: "into", options: ["into", "under", "above"] }
+        ];
+
+        const sentenceBuildingBank = [
+            { hint: "Put the words in order to find the spider:", words: ["The", "spider", "spins", "a", "web."], correct: "The spider spins a web." },
+            { hint: "What does the big dinosaur do?", words: ["The", "big", "dino", "eats", "green", "leaves."], correct: "The big dino eats green leaves." },
+            { hint: "Where is the dinosaur egg?", words: ["The", "dino", "egg", "is", "safe", "in", "the", "nest."], correct: "The dino egg is safe in the nest." },
+            { hint: "What can the jumping spider do?", words: ["A", "jumping", "spider", "can", "hop", "very", "high."], correct: "A jumping spider can hop very high." },
+            { hint: "Describe the friendly T-Rex:", words: ["The", "friendly", "T-Rex", "has", "very", "short", "arms."], correct: "The friendly T-Rex has very short arms." }
+        ];
+
+        let spellingBank = [
+            { sentence: "The creepy crawly s _ _ d _ r has eight hairy legs.", word: "spider", display: "s _ _ d _ r" },
+            { sentence: "The massive d _ _ o has sharp claws and scales.", word: "dino", display: "d _ _ o" },
+            { sentence: "A spider woven net is called a silky w _ b.", word: "web", display: "w _ b" },
+            { sentence: "The dinosaur stepped out of its smooth e _ g.", word: "egg", display: "e _ g" },
+            { sentence: "The raptor runs extremely f _ a _ t on land trails.", word: "fast", display: "f _ a _ t" }
+        ];
+
+        const mannersBank = [
+            { context: "Oh no! You accidentally stepped on your spider friend's silken web. What do you say?", a: "I am sorry", options: ["I am sorry", "Move away", "My web now"] },
+            { context: "The kind Brachiosaurus hands you a sweet berry treat. What is the best response?", a: "Thank you", options: ["Thank you", "Give me more", "Yuk"] },
+            { context: "You want to pass by a sleeping Triceratops blocking the road. What do you say?", a: "Excuse me", options: ["Excuse me", "Wake up dino", "Move it"] },
+            { context: "You want your friend to share their colorful dinosaur picture book. You say: '______ can I see?'", a: "Please", options: ["Please", "Give it", "Now"] }
+        ];
+
+        window.onload = function() {
+            startGlobalTimer();
+            updateDashboardScores();
+        };
+
+        function startGlobalTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    document.getElementById('lockscreen').style.display = 'flex';
+                } else {
+                    timeRemaining--;
+                    let mins = Math.floor(timeRemaining / 60);
+                    let secs = timeRemaining % 60;
+                    document.getElementById('timerDisplay').innerText = `⏳ ${mins}:${secs < 10 ? '0' : ''}${secs}`;
+                }
+            }, 1000);
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            document.getElementById('ruleReminderBox').style.display = 'none';
+        }
+
+        function updateDashboardScores() {
+            document.getElementById('totalScore').innerText = `Stars: ${totalStars} ⭐`;
+        }
+
+        let numA, numB, correctGateAnswer;
+        function openParentGate() {
+            numA = Math.floor(Math.random() * 8) + 2;
+            numB = Math.floor(Math.random() * 7) + 2;
+            correctGateAnswer = numA + numB;
+            document.getElementById('gateMathProblem').innerText = `${numA} + ${numB} = ?`;
+            document.getElementById('gateAnswer').value = '';
+            showScreen('screen-parent-gate');
+        }
+
+        function verifyParentGate() {
+            let inputAns = parseInt(document.getElementById('gateAnswer').value);
+            if (inputAns === correctGateAnswer) {
+                showScreen('screen-parent-dashboard');
+            } else {
+                alert("Incorrect calculation code. Access denied.");
+                showScreen('screen-menu');
+            }
+        }
+
+        function saveTimerSetting() {
+            let minsInput = parseInt(document.getElementById('screenTimeInput').value);
+            if (minsInput && minsInput > 0) {
+                timeRemaining = minsInput * 60;
+                startGlobalTimer();
+                alert(`Screen timer updated to ${minsInput} minutes.`);
+            }
+        }
+
+        function saveCustomWord() {
+            let word = document.getElementById('customWord').value.trim().toLowerCase();
+            let sent = document.getElementById('customSentence').value.trim();
+            if (word && sent) {
+                spellingBank.push({ sentence: sent, word: word, display: word.replace(/./g, '_ ') });
+                alert(`"${word}" added to the spelling bank!`);
+                document.getElementById('customWord').value = '';
+                document.getElementById('customSentence').value = '';
+            }
+        }
+
+        function setupGameEngine(moduleName, questionsList) {
+            currentModule = moduleName;
+            moduleQuestions = [...questionsList].sort(() => 0.5 - Math.random()).slice(0, 5);
+            currentQuestionIdx = 0;
+            currentModuleScore = 0;
+            loadTaskInstance();
+            showScreen('screen-game');
+        }
+
+        function loadTaskInstance() {
+            document.getElementById('gameFeedback').innerText = '';
+            document.getElementById('gameProgress').innerText = `Task ${currentQuestionIdx + 1} of ${moduleQuestions.length}`;
+            document.getElementById('gameScore').innerText = `Score: ${currentModuleScore} ⭐`;
+
+            let currentData = moduleQuestions[currentQuestionIdx];
+            let displayBox = document.getElementById('gameDisplayBox');
+            let optionsBox = document.getElementById('gameOptions');
+            displayBox.innerHTML = '';
+            optionsBox.innerHTML = '';
+
+            if (currentModule === 'prepositions' || currentModule === 'manners') {
+                document.getElementById('gameInstruction').innerText = "Choose the correct missing word:";
+                displayBox.innerText = currentData.q || currentData.context;
+
+                currentData.options.forEach(opt => {
+                    let tile = document.createElement('button');
+                    tile.className = 'option-tile';
+                    tile.innerText = opt;
+                    tile.onclick = () => verifyAnswerSelection(opt, currentData.a);
+                    optionsBox.appendChild(tile);
+                });
+            }
+            else if (currentModule === 'sentence') {
+                document.getElementById('gameInstruction').innerText = currentData.hint;
+                let activeArr = [];
+                let shuffledWords = [...currentData.words].sort(() => 0.5 - Math.random());
+
+                shuffledWords.forEach(w => {
+                    let tile = document.createElement('button');
+                    tile.className = 'option-tile';
+                    tile.innerText = w;
+                    tile.onclick = () => {
+                        activeArr.push(w);
+                        displayBox.innerText = activeArr.join(' ');
+                        tile.style.visibility = 'hidden';
+                    
