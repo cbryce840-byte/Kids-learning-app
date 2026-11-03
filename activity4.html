@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Prepositions Adventure Game</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Fredoka', cursive, sans-serif;
+      background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 50%, #a855f7 100%);
+      min-height: 100vh;
+      user-select: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 16px;
+      margin: 0;
+      touch-action: none;
+    }
+    .card-bounce {
+      animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.85); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .draggable-item {
+      cursor: grab;
+      touch-action: none;
+      transition: filter 0.2s;
+    }
+    .draggable-item:active {
+      cursor: grabbing;
+      transform: scale(1.1);
+    }
+    .btn-press:active {
+      transform: scale(0.95);
+    }
+  </style>
+</head>
+<body>
+
+    <!-- HOME MENU BUTTON -->
+    <div class="w-full max-w-lg mb-3">
+        <a href="index.html" style="
+            display: inline-block;
+            padding: 10px 20px;
+            background: #2d3436;
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: bold;
+            font-family: sans-serif;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        ">🏠 Home Menu</a>
+    </div>
+
+  <!-- Main Container -->
+  <div id="app" class="w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden border-8 border-yellow-300 relative min-h-[620px] flex flex-col justify-between p-5">
+    
+    <!-- Top Header & Progress -->
+    <div>
+      <div class="flex items-center justify-between mb-2">
+        <span id="question-count" class="bg-indigo-100 text-indigo-900 font-bold px-4 py-1.5 rounded-full text-lg border-2 border-indigo-300">
+          Mission 1/30
+        </span>
+        <button id="speaker-btn" onclick="speakCurrentSentence()" class="bg-yellow-400 hover:bg-yellow-300 text-yellow-950 font-bold px-3 py-1.5 rounded-2xl flex items-center gap-2 shadow-md btn-press border-2 border-yellow-500">
+          <i class="fa-solid fa-volume-high text-lg"></i>
+          <span class="text-sm">Listen 🔊</span>
+        </button>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="w-full bg-gray-200 h-3 rounded-full overflow-hidden border-2 border-gray-300 mb-3">
+        <div id="progress-bar" class="bg-gradient-to-r from-yellow-400 to-emerald-400 h-full w-1/30 transition-all duration-300"></div>
+      </div>
+    </div>
+
+    <!-- Gameplay Area -->
+    <div id="quiz-screen" class="card-bounce flex-grow flex flex-col justify-between items-center text-center">
+      
+      <!-- Instruction Prompt -->
+      <div class="bg-indigo-50 border-3 border-indigo-200 rounded-2xl p-3 w-full shadow-inner mb-2">
+        <p class="text-indigo-950 font-extrabold text-base sm:text-lg leading-snug" id="sentence-prompt">
+          Move the <span id="target-character-name" class="text-purple-700">dinosaur</span> <span class="text-rose-600 underline decoration-yellow-400 decoration-3" id="target-preposition">under</span> the <span id="target-object-name" class="text-emerald-700">rock</span>!
+        </p>
+      </div>
+
+      <!-- Interactive Playground Box -->
+      <div id="playground" class="relative w-full h-[260px] bg-gradient-to-b from-sky-200 to-emerald-200 rounded-3xl border-4 border-indigo-300 overflow-hidden shadow-inner flex items-center justify-center">
+        
+        <!-- Distractor Background Objects (to make it challenging) -->
+        <div class="absolute top-3 left-4 text-3xl opacity-70">🌸</div>
+        <div class="absolute top-4 right-5 text-3xl opacity-70">🍄</div>
+        <div class="absolute bottom-3 left-10 text-3xl opacity-70">⭐</div>
+        <div class="absolute bottom-2 right-12 text-3xl opacity-70">🍂</div>
+
+        <!-- Target Main Object -->
+        <div id="scene-object" class="absolute text-6xl select-none filter drop-shadow-md z-10">
+          🪨
+        </div>
+
+        <!-- Movable Main Character -->
+        <div id="character" class="draggable-item absolute text-6xl select-none filter drop-shadow-xl z-20" style="left: 20px; bottom: 20px;">
+          🦖
+        </div>
+
+      </div>
+
+      <!-- Check Position Button -->
+      <button onclick="checkPosition()" class="w-full mt-3 bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold py-3 px-6 rounded-2xl text-xl shadow-lg border-b-6 border-emerald-700 btn-press flex items-center justify-center gap-2">
+        <i class="fa-solid fa-circle-check text-2xl"></i> Check My Spot!
+      </button>
+
+    </div>
+
+    <!-- Feedback Overlay Modal -->
+    <div id="feedback-modal" class="hidden absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-6 z-30">
+      <div id="feedback-card" class="bg-white rounded-3xl p-6 text-center max-w-sm w-full border-4 border-yellow-400 shadow-2xl card-bounce flex flex-col items-center">
+        <div id="feedback-icon" class="text-6xl mb-2">⭐</div>
+        <h3 id="feedback-title" class="text-3xl font-extrabold text-gray-800 mb-2">Great Job!</h3>
+        <p id="feedback-msg" class="text-lg text-gray-600 mb-6 leading-snug">You placed the character correctly!</p>
+        
+        <button onclick="nextMission()" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 text-xl rounded-2xl shadow-md border-b-4 border-blue-700 btn-press">
+          Next ➔
+        </button>
+      </div>
+    </div>
+
+    <!-- Final Results Screen -->
+    <div id="results-screen" class="hidden flex-grow flex flex-col items-center justify-center text-center p-2 card-bounce">
+      <div class="text-7xl mb-2">🏆</div>
+      <h2 class="text-3xl font-extrabold text-indigo-900 mb-1">Preposition Master!</h2>
+      <p class="text-lg text-gray-600 mb-4">You completed all 30 missions!</p>
+      
+      <div class="bg-indigo-50 rounded-2xl p-5 w-full border-2 border-indigo-200 mb-6">
+        <div class="text-gray-500 text-sm font-bold uppercase tracking-wider mb-1">Your Score</div>
+        <div id="final-score" class="text-5xl font-black text-indigo-600">30 / 30</div>
+        <div id="star-rating" class="text-3xl mt-2">⭐⭐⭐⭐⭐</div>
+      </div>
+
+      <button onclick="restartAdventure()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-extrabold py-4 rounded-2xl text-2xl shadow-lg border-b-4 border-yellow-600 btn-press flex items-center justify-center gap-2">
+        <i class="fa-solid fa-rotate-right"></i> Play Again!
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    // 30 Completely Synchronized Preposition Missions
+    const prepositionBank = [
+      { characterName: "dinosaur", characterEmoji: "🦖", prep: "under", objectEmoji: "🪨", objectName: "rock", targetPosition: {x: 180, y: 130}, explanation: "The dinosaur is underneath the rock!" },
+      { characterName: "lizard", characterEmoji: "🦎", prep: "on top of", objectEmoji: "📦", objectName: "box", targetPosition: {x: 180, y: 30}, explanation: "The lizard is resting right on top of the box!" },
+      { characterName: "spider", characterEmoji: "🕷️", prep: "next to", objectEmoji: "🪵", objectName: "log", targetPosition: {x: 280, y: 130}, explanation: "The spider is sitting right next to the log!" },
+      { characterName: "frog", characterEmoji: "🐸", prep: "behind", objectEmoji: "🌳", objectName: "tree", targetPosition: {x: 60, y: 130}, explanation: "The frog is hiding behind the tree!" },
+      { characterName: "crab", characterEmoji: "🦀", prep: "in front of", objectEmoji: "⛺", objectName: "tent", targetPosition: {x: 180, y: 150}, explanation: "The crab is standing right in front of the tent!" },
+      { characterName: "dinosaur", characterEmoji: "🦖", prep: "above", objectEmoji: "☁️", objectName: "cloud", targetPosition: {x: 180, y: 20}, explanation: "The dinosaur is soaring high up above!" },
+      { characterName: "lizard", characterEmoji: "🦎", prep: "beside", objectEmoji: "🍄", objectName: "mushroom", targetPosition: {x: 270, y: 130}, explanation: "The lizard is right beside the mushroom!" },
+      { characterName: "spider", characterEmoji: "🕷️", prep: "near", objectEmoji: "🌊", objectName: "water pond", targetPosition: {x: 90, y: 130}, explanation: "The spider is playing near the water!" },
+      { characterName: "frog", characterEmoji: "🐸", prep: "on", objectEmoji: "🍃", objectName: "leaf", targetPosition: {x: 180, y: 35}, explanation: "The frog is sitting on the green leaf!" },
+      { characterName: "crab", characterEmoji: "🦀", prep: "under", objectEmoji: "🍄", objectName: "mushroom", targetPosition: {x: 180, y: 130}, explanation: "The crab is protected under the mushroom!" },
+      { characterName: "dinosaur", characterEmoji: "🦖", prep: "next to", objectEmoji: "🎁", objectName: "gift box", targetPosition: {x: 70, y: 130}, explanation: "The dinosaur is standing next to the gift!" },
+      { characterName: "lizard", characterEmoji: "🦎", prep: "behind", objectEmoji: "📦", objectName: "box", targetPosition: {x: 280, y: 130}, explanation: "The lizard is hidden behind the box!" },
+      { characterName: "spider", characterEmoji: "🕷️", prep: "in front of", objectEmoji: "🪵", objectName: "log", targetPosition: {x: 180, y: 150}, explanation: "The spider is right in front of the log!" },
+      { characterName: "frog", characterEmoji: "🐸", prep: "on top of", objectEmoji: "🪨", objectName: "rock", targetPosition: {x: 180, y: 30}, explanation: "The frog is on top of the rock!" },
+      { characterName: "crab", characterEmoji: "🦀", prep: "near", objectEmoji: "🌳", objectName: "tree", targetPosition: {x: 270, y: 130}, explanation: "The crab is resting near the tree!" },
+      { characterName: "dinosaur", characterEmoji: "🦖", prep: "beside", objectEmoji: "⛺", objectName: "tent", targetPosition: {x: 60, y: 130}, explanation: "The dinosaur is right beside the tent!" },
+      { characterName: "lizard", characterEmoji: "🦎", prep: "under", objectEmoji: "🪵", objectName: "log", targetPosition: {x: 180, y: 130}, explanation: "The lizard crept under the log!" },
+      { characterName: "spider", characterEmoji: "🕷️", prep: "on top of", objectEmoji: "🍄", objectName: "mushroom", targetPosition: {x: 180, y: 30}, explanation: "The spider balanced on top of the mushroom!" },
+      { characterName: "frog", characterEmoji: "🐸", prep: "next to", objectEmoji: "🌊", objectName: "stream", targetPosition: {x: 280, y: 130}, explanation: "The frog is standing next to the stream!" },
+      { characterName: "crab", characterEmoji: "🦀", prep: "behind", objectEmoji: "⛺", objectName: "tent", targetPosition: {x: 50, y: 130}, explanation: "The crab peeked from behind the tent!" },
+      { characterName: "dinosaur", characterEmoji: "🦖", prep: "in front of", objectEmoji: "🌳", objectName: "tree", targetPosition: {x: 180, y: 150}, explanation: "The dinosaur is standing in front of the tree!" },
+      { characterName: "lizard", characterEmoji: "🦎", prep: "near", objectEmoji: "📦", objectName: "box", targetPosition: {x: 80, y: 130}, explanation: "The lizard is hanging out near the box!" },
+      { characterName: "spider", characterEmoji: "🕷️", prep: "under", objectEmoji: "☁️", objectName: "cloud", targetPosition: {x: 180, y: 130}, explanation: "The spider is under the cloud's shadow!" },
+      { characterName: "frog", characterEmoji: "🐸", prep: "beside", objectEmoji: "🪨", objectName: "rock", targetPosition: {x: 70, y: 130}, explanation: "The frog is cozied up beside the rock!" },
+      { characterName: "crab", characterEmoji: "🦀", prep: "on top of", objectEmoji: "🍃", objectName: "leaf", targetPosition: {x: 180, y: 35}, explanation: "The crab is on top of the leaf!" },
+      { characterName: "dinosaur", characterEmoji: "🦖", prep: "behind", objectEmoji: "🪨", objectName: "rock", targetPosition: {x: 280, y: 130}, explanation: "The dinosaur is behind the rock!" },
+      { characterName: "lizard", characterEmoji: "🦎", prep: "in front of", objectEmoji: "🍄", objectName: "mushroom", targetPosition: {x: 180, y: 150}, explanation: "The lizard is in front of the mushroom!" },
+      { characterName: "spider", characterEmoji: "🕷️", prep: "on", objectEmoji: "📦", objectName: "box", targetPosition: {x: 180, y: 30}, explanation: "The spider is crawling on the box!" },
+      { characterName: "frog", characterEmoji: "🐸", prep: "near", objectEmoji: "🪵", objectName: "log", targetPosition: {x: 70, y: 130}, explanation: "The frog is near the log!" },
+      { characterName: "crab", characterEmoji: "🦀", prep: "above", objectEmoji: "☁️", objectName: "cloud", targetPosition: {x: 180, y: 20}, explanation: "The crab is floating up above!" }
+    ];
+
+    let missions = [];
+    let currentIndex = 0;
+    let score = 0;
+
+    let isDragging = false;
+    let characterEl, playground;
+    let startX = 0, startY = 0;
+    let charX = 20, charY = 150;
+
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function initGame() {
+      missions = shuffleArray(prepositionBank);
+      currentIndex = 0;
+      score = 0;
+      setupDragging();
+      loadMission();
+    }
+
+    function loadMission() {
+      const m = missions[currentIndex];
+      document.getElementById('question-count').innerText = `Mission ${currentIndex + 1}/${missions.length}`;
+      document.getElementById('progress-bar').style.width = `${((currentIndex + 1) / missions.length) * 100}%`;
+      
+      document.getElementById('target-character-name').innerText = m.characterName;
+      document.getElementById('target-preposition').innerText = m.prep;
+      document.getElementById('target-object-name').innerText = m.objectName;
+
+      // Set correct character emoji and main object emoji
+      document.getElementById('character').innerText = m.characterEmoji;
+      document.getElementById('scene-object').innerText = m.objectEmoji;
+
+      // Position center object
+      const objEl = document.getElementById('scene-object');
+      objEl.style.left = '150px';
+      objEl.style.top = '70px';
+
+      // Reset character to starting corner
+      charX = 20;
+      charY = 150;
+      updateCharPosition();
+
+      const quizScreen = document.getElementById('quiz-screen');
+      quizScreen.classList.remove('card-bounce');
+      void quizScreen.offsetWidth;
+      quizScreen.classList.add('card-bounce');
+
+      setTimeout(() => speakCurrentSentence(), 300);
+    }
+
+    function updateCharPosition() {
+      characterEl = document.getElementById('character');
+      characterEl.style.left = charX + 'px';
+      characterEl.style.top = charY + 'px';
+    }
+
+    function setupDragging() {
+      characterEl = document.getElementById('character');
+      playground = document.getElementById('playground');
+
+      characterEl.addEventListener('mousedown', startDrag);
+      document.addEventListener('mousemove', drag);
+      document.addEventListener('mouseup', endDrag);
+
+      characterEl.addEventListener('touchstart', startDrag, {passive: false});
+      document.addEventListener('touchmove', drag, {passive: false});
+      document.addEventListener('touchend', endDrag);
+    }
+
+    function startDrag(e) {
+      isDragging = true;
+      const clientX = e.clientX || e.touches[0].clientX;
+      const clientY = e.clientY || e.touches[0].clientY;
+      
+      startX = clientX - charX;
+      startY = clientY - charY;
+      e.preventDefault();
+    }
+
+    function drag(e) {
+      if (!isDragging) return;
+      const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+      const clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+
+      const maxW = playground.clientWidth - 70;
+      const maxH = playground.clientHeight - 70;
+      
+      charX = clientX - startX;
+      charY = clientY - startY;
+
+      charX = Math.max(10, Math.min(charX, maxW));
+      charY = Math.max(10, Math.min(charY, maxH));
+
+      updateCharPosition();
+    }
+
+    function endDrag() {
+      isDragging = false;
+    }
+
+    function checkPosition() {
+      const m = missions[currentIndex];
+      const target = m.targetPosition;
+
+      const distance = Math.hypot(charX - target.x, charY - target.y);
+      const isCorrect = distance < 75;
+
+      const modal = document.getElementById('feedback-modal');
+      const icon = document.getElementById('feedback-icon');
+      const title = document.getElementById('feedback-title');
+      const msg = document.getElementById('feedback-msg');
+
+      if (isCorrect) {
+        score++;
+        icon.innerText = "⭐";
+        title.innerText = "Super Star!";
+        title.className = "text-3xl font-extrabold text-green-600 mb-2";
+        msg.innerText = m.explanation;
+        confetti({ particleCount: 60, spread: 70, origin: { y: 0.7 } });
+        playTone(523.25, 0.25);
+        speakText(m.explanation);
+      } else {
+        icon.innerText = "💡";
+        title.innerText = "Close Try!";
+        title.className = "text-3xl font-extrabold text-orange-500 mb-2";
+        msg.innerText = `To put the ${m.characterName} ${m.prep} the ${m.objectName}, try moving it closer! ${m.explanation}`;
+        playTone(220.00, 0.3);
+        speakText(m.explanation);
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function nextMission() {
+      document.getElementById('feedback-modal').classList.add('hidden');
+      currentIndex++;
+      if (currentIndex < missions.length) {
+        loadMission();
+      } else {
+        showResults();
+      }
+    }
+
+    function showResults() {
+      document.getElementById('quiz-screen').classList.add('hidden');
+      document.getElementById('question-count').innerText = "Complete!";
+      document.getElementById('speaker-btn').classList.add('hidden');
+      document.getElementById('results-screen').classList.remove('hidden');
+
+      document.getElementById('final-score').innerText = `${score} / ${missions.length}`;
+
+      const stars = document.getElementById('star-rating');
+      if (score === 30) stars.innerText = "⭐⭐⭐⭐⭐ Master Explorer!";
+      else if (score >= 24) stars.innerText = "⭐⭐⭐⭐ Great Job!";
+      else if (score >= 15) stars.innerText = "⭐⭐⭐ Good Effort!";
+      else stars.innerText = "⭐ Keep Practicing!";
+
+      confetti({ particleCount: 150, spread: 110, origin: { y: 0.5 } });
+      speakText(`Fantastic job! You finished all 30 preposition missions with a score of ${score} out of 30!`);
+    }
+
+    function restartAdventure() {
+      document.getElementById('speaker-btn').classList.remove('hidden');
+      document.getElementById('results-screen').classList.add('hidden');
+        function nextMission() {
+      document.getElementById('feedback-modal').classList.add('hidden');
+      currentIndex++;
+      if (currentIndex < missions.length) {
+        loadMission();
+      } else {
+        showResults();
+      }
+    }
+
+    function showResults() {
+      document.getElementById('quiz-screen').classList.add('hidden');
+      document.getElementById('question-count').innerText = "Complete!";
+      document.getElementById('speaker-btn').classList.add('hidden');
+      document.getElementById('results-screen').classList.remove('hidden');
+
+      document.getElementById('final-score').innerText = `${score} / ${missions.length}`;
+
+      const stars = document.getElementById('star-rating');
+      if (score === 30) stars.innerText = "⭐⭐⭐⭐⭐ Master Explorer!";
+      else if (score >= 24) stars.innerText = "⭐⭐⭐⭐ Great Job!";
+      else if (score >= 15) stars.innerText = "⭐⭐⭐ Good Effort!";
+      else stars.innerText = "⭐ Keep Practicing!";
+
+      confetti({ particleCount: 150, spread: 110, origin: { y: 0.5 } });
+      speakText(`Fantastic job! You finished all 30 preposition missions with a score of ${score} out of 30!`);
+    }
+
+    function restartAdventure() {
+      document.getElementById('speaker-btn').classList.remove('hidden');
+      document.getElementById('results-screen').classList.add('hidden');
+      document.getElementById('quiz-screen').classList.remove('hidden');
+      initGame();
+    }
+
+    function speakCurrentSentence() {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const m = missions[currentIndex];
+        const utterance = new SpeechSynthesisUtterance(`Move the ${m.characterName} ${m.prep} the ${m.objectName}!`);
+        utterance.rate = 0.85;
+        utterance.pitch = 1.1;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    function speakText(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 0.9;
+        utterance.pitch = 1.1;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    function playTone(freq, duration) {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.frequency.value = freq;
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    window.onload = function() {
+      initGame();
+    };
+  </script>
+</body>
+</html>
