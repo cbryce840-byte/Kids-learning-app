@@ -1,6 +1,13 @@
 const state = {
     customWords: ["cereal", "bicycle", "circus", "city", "face"],
-    generalWords: ["apple", "banana", "cat", "dog", "elephant", "fish", "giraffe", "house", "ice", "jump", "kite", "lion", "monkey", "nest", "orange", "pencil", "queen", "rabbit", "sun", "tree", "umbrella", "van", "water", "box", "yellow", "zebra", "book", "chair", "desk", "park"]
+    generalWords: ["apple", "banana", "cat", "dog", "elephant", "fish", "giraffe", "house", "ice", "jump", "kite", "lion", "monkey", "nest", "orange", "pencil", "queen", "rabbit", "sun", "tree", "umbrella", "van", "water", "box", "yellow", "zebra", "book", "chair", "desk", "park"],
+    sentences: [
+        "The fish is swimming in the water.",
+        "I like to ride my bicycle in the park.",
+        "Sally washes her face every morning.",
+        "We went to the city of Montego Bay.",
+        "Why did you leave the cereal on the table?"
+    ]
 };
 
 function showMenu() {
@@ -15,9 +22,9 @@ function startModule(moduleName) {
     container.style.display = 'block';
 
     if (moduleName === 'maths') {
-        loadMathsActivity(content);
+        loadMathsMenu(content);
     } else if (moduleName === 'spelling') {
-        loadSpellingActivity(content);
+        loadSpellingMenu(content);
     } else if (moduleName === 'punctuation') {
         loadPunctuationActivity(content);
     } else if (moduleName === 'capitalization') {
@@ -27,8 +34,25 @@ function startModule(moduleName) {
     }
 }
 
-/* 1. MATHS: SIDE-BY-SIDE SETS */
-function loadMathsActivity(content) {
+/* --- MATHS MENU & ACTIVITIES --- */
+function loadMathsMenu(content) {
+    content.innerHTML = `
+        <h2>🧮 Maths Adventure</h2>
+        <p>Choose a fun math activity to play:</p>
+        <div class="grid-menu" style="margin-top: 15px;">
+            <div class="menu-card maths" onclick="loadSideBySideMath(document.getElementById('activity-content'))" style="padding:15px;">
+                <div class="icon" style="font-size:2rem;">⚖️</div>
+                <h3>Comparing Sets</h3>
+            </div>
+            <div class="menu-card maths" onclick="loadPictographMath(document.getElementById('activity-content'))" style="padding:15px;">
+                <div class="icon" style="font-size:2rem;">📊</div>
+                <h3>Pictographs</h3>
+            </div>
+        </div>
+    `;
+}
+
+function loadSideBySideMath(content) {
     const numLeft = Math.floor(Math.random() * 8) + 1;
     const numRight = Math.floor(Math.random() * 8) + 1;
     const items = ['🍎', '🚗', '⭐', '🎈', '🐶', '🏀'];
@@ -38,6 +62,7 @@ function loadMathsActivity(content) {
     let rightEmojis = Array(numRight).fill(chosenEmoji).map(e => `<span class="item-emoji">${e}</span>`).join('');
 
     content.innerHTML = `
+        <button class="back-btn" onclick="loadMathsMenu(document.getElementById('activity-content'))">⬅️ Back to Maths Menu</button>
         <h2>Comparing Sets</h2>
         <p>Count the objects on each side. Pick $<$, $>$, or $=$</p>
         <div class="side-by-side-container">
@@ -62,18 +87,91 @@ function checkMathAnswer(selected, left, right) {
     const feedback = document.getElementById('math-feedback');
     if (selected === correct) {
         feedback.innerHTML = "<span style='color:green;'>🎉 Great job Dillon! That's correct!</span>";
-        setTimeout(() => startModule('maths'), 1500);
+        setTimeout(() => loadSideBySideMath(document.getElementById('activity-content')), 1500);
     } else {
         feedback.innerHTML = "<span style='color:red;'>Try again! Count carefully.</span>";
     }
 }
 
-/* 2. SPELLING & PHONICS */
-function loadSpellingActivity(content) {
-    const word = state.generalWords[Math.floor(Math.random() * state.generalWords.length)];
+function loadPictographMath(content) {
     content.innerHTML = `
-        <h2>Spelling Practice</h2>
-        <p>Listen and type the word you hear:</p>
+        <button class="back-btn" onclick="loadMathsMenu(document.getElementById('activity-content'))">⬅️ Back to Maths Menu</button>
+        <h2>Pictograph Challenge</h2>
+        <p>🍎 Apple Count: Look at the chart and answer the question!</p>
+        <div style="background:#f8f9fa; padding:15px; border-radius:10px; margin:15px 0; text-align:left;">
+            <p>Monday: 🍎 🍎 🍎</p>
+            <p>Tuesday: 🍎 🍎 🍎 🍎 🍎</p>
+        </div>
+        <p>Which day had more apples?</p>
+        <div class="options-row">
+            <button class="btn-option" onclick="checkPicto(false)">Monday</button>
+            <button class="btn-option" onclick="checkPicto(true)">Tuesday</button>
+        </div>
+        <div id="picto-feedback" style="margin-top:15px; font-weight:bold; text-align:center;"></div>
+    `;
+}
+
+function checkPicto(isCorrect) {
+    const feedback = document.getElementById('picto-feedback');
+    if (isCorrect) {
+        feedback.innerHTML = "<span style='color:green;'>⭐ Correct! Tuesday has 5 apples!</span>";
+        setTimeout(() => loadPictographMath(document.getElementById('activity-content')), 1500);
+    } else {
+        feedback.innerHTML = "<span style='color:red;'>Try again! Count the apples on each day.</span>";
+    }
+}
+
+/* --- SPELLING & PHONICS MENU --- */
+function loadSpellingMenu(content) {
+    content.innerHTML = `
+        <h2>🔤 Spelling & Phonics</h2>
+        <p>Choose your learning activity:</p>
+        <div class="grid-menu" style="margin-top: 15px;">
+            <div class="menu-card spelling" onclick="loadSoftCActivity(document.getElementById('activity-content'))" style="padding:15px;">
+                <div class="icon" style="font-size:2rem;">✨</div>
+                <h3>Soft 'C' Phonics</h3>
+            </div>
+            <div class="menu-card spelling" onclick="loadWordSpelling(document.getElementById('activity-content'))" style="padding:15px;">
+                <div class="icon" style="font-size:2rem;">🔊</div>
+                <h3>Listen & Spell Words</h3>
+            </div>
+        </div>
+    `;
+}
+
+function loadSoftCActivity(content) {
+    content.innerHTML = `
+        <button class="back-btn" onclick="loadSpellingMenu(document.getElementById('activity-content'))">⬅️ Back to Spelling Menu</button>
+        <h2>Phonics: The Soft 'C' Sound</h2>
+        <div style="background:#eafaf1; padding:15px; border-radius:10px; text-align:left; margin-bottom:15px;">
+            💡 <strong>Rule:</strong> When 'c' is followed by <strong>e, i, or y</strong>, it makes an /s/ sound (like in <em>ice</em> or <em>city</em>)!
+        </div>
+        <p>Which word has a Soft 'C' sound?</p>
+        <div class="options-row">
+            <button class="btn-option" onclick="checkSoftC(true)">city</button>
+            <button class="btn-option" onclick="checkSoftC(false)">cat</button>
+        </div>
+        <div id="softc-feedback" style="margin-top:15px; font-weight:bold; text-align:center;"></div>
+    `;
+}
+
+function checkSoftC(isCorrect) {
+    const feedback = document.getElementById('softc-feedback');
+    if (isCorrect) {
+        feedback.innerHTML = "<span style='color:green;'>🌟 Spot on! 'City' uses the soft 'C' sound.</span>";
+        setTimeout(() => loadSoftCActivity(document.getElementById('activity-content')), 1500);
+    } else {
+        feedback.innerHTML = "<span style='color:red;'>'Cat' has a hard 'K' sound. Try again!</span>";
+    }
+}
+
+function loadWordSpelling(content) {
+    const allWords = [...state.generalWords, ...state.customWords];
+    const word = allWords[Math.floor(Math.random() * allWords.length)];
+    content.innerHTML = `
+        <button class="back-btn" onclick="loadSpellingMenu(document.getElementById('activity-content'))">⬅️ Back to Spelling Menu</button>
+        <h2>Listen & Spell</h2>
+        <p>Click speaker to listen, then type the word:</p>
         <button class="btn-option" onclick="speakWord('${word}')">🔊 Listen to Word</button>
         <br><br>
         <input type="text" id="spelling-input" placeholder="Type word here">
@@ -92,14 +190,14 @@ function checkSpelling(correctWord) {
     const val = document.getElementById('spelling-input').value.toLowerCase().trim();
     const feedback = document.getElementById('spelling-feedback');
     if (val === correctWord) {
-        feedback.innerHTML = "<span style='color:green;'>🌟 Awesome spelling, Dillon!</span>";
-        setTimeout(() => startModule('spelling'), 1500);
+        feedback.innerHTML = "<span style='color:green;'>🎉 Awesome spelling, Dillon!</span>";
+        setTimeout(() => loadWordSpelling(document.getElementById('activity-content')), 1500);
     } else {
-        feedback.innerHTML = "<span style='color:red;'>Not quite, try listening again!</span>";
+        feedback.innerHTML = "<span style='color:red;'>Not quite right, listen again!</span>";
     }
 }
 
-/* 3. PUNCTUATION */
+/* --- PUNCTUATION --- */
 function loadPunctuationActivity(content) {
     const questions = [
         { text: "Where is the dog", answer: "?" },
@@ -125,17 +223,17 @@ function checkPunc(selected, correct) {
     const feedback = document.getElementById('punc-feedback');
     if (selected === correct) {
         feedback.innerHTML = "<span style='color:green;'>🎯 Spot on!</span>";
-        setTimeout(() => startModule('punctuation'), 1500);
+        setTimeout(() => loadPunctuationActivity(content), 1500);
     } else {
         feedback.innerHTML = "<span style='color:red;'>Oops, try the other one!</span>";
     }
 }
 
-/* 4. CAPITALIZATION */
+/* --- CAPITALIZATION --- */
 function loadCapitalizationActivity(content) {
     content.innerHTML = `
         <h2>Capitalization Rules</h2>
-        <div style="text-align:left; background:#fff3cd; padding:15px; border-radius:10px; margin-bottom:15px;">
+        <div style="text-align:left; background:#f4ecf7; padding:15px; border-radius:10px; margin-bottom:15px;">
             📌 <strong>Rules:</strong><br>
             1. Always capitalize the first letter of a sentence.<br>
             2. Capitalize names (like <strong>Dillon</strong>).<br>
@@ -154,19 +252,19 @@ function checkCap(isCorrect) {
     const feedback = document.getElementById('cap-feedback');
     if (isCorrect) {
         feedback.innerHTML = "<span style='color:green;'>✨ You got it right!</span>";
-        setTimeout(() => startModule('capitalization'), 1500);
+        setTimeout(() => loadCapitalizationActivity(content), 1500);
     } else {
         feedback.innerHTML = "<span style='color:red;'>Remember: Names must start with a CAPITAL letter!</span>";
     }
 }
 
-/* 5. PREPOSITION QUEST */
+/* --- PREPOSITION QUEST --- */
 function loadPrepositionActivity(content) {
     content.innerHTML = `
         <h2>Preposition Quest</h2>
         <p>Drag the <strong>🦕 Dino</strong> into the <strong>Box</strong>!</p>
         <div class="prep-canvas" id="canvas">
-            <div class="target-zone" style="top:80px; left:220px; width:100px; height:100px;">📦 Box</div>
+            <div class="target-zone" style="top:90px; left:250px; width:110px; height:110px;">📦 Box</div>
             <div class="draggable-character" id="dino-char">🦕</div>
         </div>
         <div id="prep-feedback" style="font-weight:bold; text-align:center;"></div>
@@ -184,8 +282,8 @@ function initDraggable() {
         let clientX = e.touches ? e.touches[0].clientX : e.clientX;
         let clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
-        let x = clientX - canvas.left - 30;
-        let y = clientY - canvas.top - 30;
+        let x = clientX - canvas.left - 35;
+        let y = clientY - canvas.top - 35;
 
         char.style.left = `${x}px`;
         char.style.top = `${y}px`;
@@ -202,7 +300,7 @@ function initDraggable() {
     window.addEventListener('touchend', onEnd);
 }
 
-/* PARENT GATE FUNCTIONS */
+/* --- PARENT GATE FUNCTIONS --- */
 function openParentGate() {
     document.getElementById('parent-modal').style.display = 'flex';
 }
