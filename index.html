@@ -1,278 +1,129 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Understanding Feelings Quiz</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Fredoka', cursive, sans-serif;
-      background: linear-gradient(135deg, #a855f7 0%, #3b82f6 50%, #06b6d4 100%);
-      min-height: 100vh;
-      user-select: none;
-    }
-    .card-bounce {
-      animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    @keyframes popIn {
-      0% { transform: scale(0.8); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-    .emoji-pulse {
-      animation: pulse 2s infinite ease-in-out;
-    }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.08); }
-    }
-    .btn-press:active {
-      transform: scale(0.95);
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dillon's Learning Academy</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+            background: linear-gradient(135deg, #a8c0ff 0%, #3f2b96 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 25px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin: 0 0 10px 0;
+        }
+
+        p.subtitle {
+            font-size: 1.2rem;
+            margin: 0;
+            color: #ffeaa7;
+        }
+
+        .menu-grid {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Large, colorful touch cards */
+        .app-card {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            color: white;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 4px solid white;
+        }
+
+        .app-card:active {
+            transform: scale(0.95);
+        }
+
+        /* Vibrant Colors for Each App */
+        .card-1 { background: linear-gradient(135deg, #ff7675, #d63031); }
+        .card-2 { background: linear-gradient(135deg, #00b894, #006266); }
+        .card-3 { background: linear-gradient(135deg, #fdcb6e, #e17055); }
+
+        .card-icon {
+            font-size: 3.5rem;
+            margin-right: 20px;
+            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.2));
+        }
+
+        .card-info h2 {
+            margin: 0 0 5px 0;
+            font-size: 1.6rem;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .card-info p {
+            margin: 0;
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+    </style>
 </head>
-<body class="flex items-center justify-center p-4">
+<body>
 
-  <!-- Main Container -->
-  <div id="app" class="w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden border-8 border-yellow-300 relative min-h-[580px] flex flex-col justify-between p-6">
-    
-    <!-- Top Header & Progress -->
-    <div>
-      <div class="flex items-center justify-between mb-4">
-        <span id="question-count" class="bg-purple-100 text-purple-700 font-bold px-4 py-1.5 rounded-full text-lg border-2 border-purple-300">
-          Question 1/10
-        </span>
-        <button id="speaker-btn" onclick="speakCurrentQuestion()" class="bg-yellow-400 hover:bg-yellow-300 text-yellow-900 font-bold px-4 py-2 rounded-2xl flex items-center gap-2 shadow-md btn-press border-2 border-yellow-500">
-          <i class="fa-solid fa-volume-high text-xl"></i>
-          <span class="text-base">Listen 🔊</span>
-        </button>
-      </div>
+    <header>
+        <h1>🌟 Welcome Dillon! 🌟</h1>
+        <p class="subtitle">Choose an activity to start playing:</p>
+    </header>
 
-      <!-- Progress Bar -->
-      <div class="w-full bg-gray-200 h-4 rounded-full overflow-hidden border-2 border-gray-300 mb-6">
-        <div id="progress-bar" class="bg-gradient-to-r from-yellow-400 to-green-400 h-full w-10 transition-all duration-300"></div>
-      </div>
+    <div class="menu-grid">
+        <!-- App 1 Link -->
+        <a href="activity1.html" class="app-card card-1">
+            <div class="card-icon">🎨</div>
+            <div class="card-info">
+                <h2>Activity 1</h2>
+                <p>Tap to start learning!</p>
+            </div>
+        </a>
+
+        <!-- App 2 Link -->
+        <a href="activity2.html" class="app-card card-2">
+            <div class="card-icon">🚀</div>
+            <div class="card-info">
+                <h2>Activity 2</h2>
+                <p>Tap to start playing!</p>
+            </div>
+        </a>
+
+        <!-- App 3 Link -->
+        <a href="activity3.html" class="app-card card-3">
+            <div class="card-icon">🧩</div>
+            <div class="card-info">
+                <h2>Activity 3</h2>
+                <p>Tap to start exploring!</p>
+            </div>
+        </a>
     </div>
 
-    <!-- Quiz Content Area -->
-    <div id="quiz-screen" class="card-bounce flex-grow flex flex-col justify-center items-center text-center my-2">
-      <div id="emoji-display" class="text-8xl mb-3 filter drop-shadow-lg emoji-pulse leading-none">
-        😊
-      </div>
-      
-      <h2 id="emotion-word" class="text-4xl font-extrabold text-purple-900 tracking-wide mb-1 capitalize">
-        glad
-      </h2>
-
-      <p class="text-xl font-bold text-gray-600 mb-6">
-        Is this a positive or negative feeling?
-      </p>
-
-      <!-- Choice Buttons -->
-      <div class="w-full grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <button onclick="handleAnswer('Positive')" class="bg-green-500 hover:bg-green-600 text-white font-bold py-5 px-4 rounded-2xl text-2xl shadow-lg border-b-8 border-green-700 btn-press flex items-center justify-center gap-2">
-          <span>😊 Positive</span>
-        </button>
-
-        <button onclick="handleAnswer('Negative')" class="bg-rose-500 hover:bg-rose-600 text-white font-bold py-5 px-4 rounded-2xl text-2xl shadow-lg border-b-8 border-rose-700 btn-press flex items-center justify-center gap-2">
-          <span>😔 Negative</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Feedback Overlay / Modal Area -->
-    <div id="feedback-modal" class="hidden absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-6 z-20">
-      <div id="feedback-card" class="bg-white rounded-3xl p-6 text-center max-w-sm w-full border-4 border-yellow-400 shadow-2xl card-bounce">
-        <div id="feedback-icon" class="text-6xl mb-2">⭐</div>
-        <h3 id="feedback-title" class="text-3xl font-extrabold text-gray-800 mb-2">Great Job!</h3>
-        <p id="feedback-msg" class="text-lg text-gray-600 mb-6">Glad is a happy, positive feeling!</p>
-        <button onclick="nextQuestion()" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 text-xl rounded-2xl shadow-md border-b-4 border-blue-700 btn-press">
-          Next ➔
-        </button>
-      </div>
-    </div>
-
-    <!-- Final Results Screen -->
-    <div id="results-screen" class="hidden flex-grow flex flex-col items-center justify-center text-center p-2 card-bounce">
-      <div class="text-7xl mb-2">🏆</div>
-      <h2 class="text-3xl font-extrabold text-purple-900 mb-2">Quiz Finished!</h2>
-      <p class="text-lg text-gray-600 mb-4">You did a wonderful job learning about feelings!</p>
-      
-      <div class="bg-purple-50 rounded-2xl p-4 w-full border-2 border-purple-200 mb-6">
-        <div class="text-gray-500 text-sm font-bold uppercase tracking-wider mb-1">Your Score</div>
-        <div id="final-score" class="text-5xl font-black text-purple-600">8 / 10</div>
-        <div id="star-rating" class="text-3xl mt-2">⭐⭐⭐</div>
-      </div>
-
-      <button onclick="restartQuiz()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-extrabold py-4 rounded-2xl text-2xl shadow-lg border-b-4 border-yellow-600 btn-press flex items-center justify-center gap-2">
-        <i class="fa-solid fa-rotate-right"></i> Play Again!
-      </button>
-    </div>
-
-  </div>
-
-  <script>
-    // Complete 31 feelings from the textbook page image
-    const questions = [
-      { word: "sad", emoji: "😢", type: "Negative", explanation: "Sad means feeling down, unhappy, or crying." },
-      { word: "glad", emoji: "😄", type: "Positive", explanation: "Glad means feeling happy and full of joy!" },
-      { word: "frustrated", emoji: "😤", type: "Negative", explanation: "Frustrated is a tricky feeling when things don't work out as planned." },
-      { word: "panicky", emoji: "😱", type: "Negative", explanation: "Panicky is a sudden feeling of big fear or worry." },
-      { word: "hopeful", emoji: "🌟", type: "Positive", explanation: "Hopeful means expecting good things to happen!" },
-      { word: "jealous", emoji: "😒", type: "Negative", explanation: "Jealous is wishing you had something someone else has." },
-      { word: "brave", emoji: "🦁", type: "Positive", explanation: "Brave means being courageous even when things are scary!" },
-      { word: "humiliated", emoji: "😳", type: "Negative", explanation: "Humiliated means feeling very embarrassed in front of others." },
-      { word: "able", emoji: "💪", type: "Positive", explanation: "Able means knowing you can do something well!" },
-      { word: "comfortable", emoji: "🛋️", type: "Positive", explanation: "Comfortable means feeling cozy, safe, and relaxed." },
-      { word: "peaceful", emoji: "🕊️", type: "Positive", explanation: "Peaceful means feeling calm and quiet inside." },
-      { word: "depressed", emoji: "😞", type: "Negative", explanation: "Depressed is feeling very sad and having very low energy." },
-      { word: "annoyed", emoji: "😑", type: "Negative", explanation: "Annoyed means feeling a little mad or bothered." },
-      { word: "content", emoji: "😌", type: "Positive", explanation: "Content means feeling happy and satisfied with what you have." },
-      { word: "anxious", emoji: "😰", type: "Negative", explanation: "Anxious means feeling nervous or worried about something." },
-      { word: "thrilled", emoji: "🎉", type: "Positive", explanation: "Thrilled means super excited and happy!" },
-      { word: "irritated", emoji: "😾", type: "Negative", explanation: "Irritated means feeling grumpy or easily bothered." },
-      { word: "tired", emoji: "🥱", type: "Negative", explanation: "Tired means needing sleep or rest." },
-      { word: "greedy", emoji: "🤑", type: "Negative", explanation: "Greedy means wanting way more than you need without sharing." },
-      { word: "excited", emoji: "🤩", type: "Positive", explanation: "Excited means feeling full of cheerful energy!" },
-      { word: "aggressive", emoji: "💥", type: "Negative", explanation: "Aggressive means acting angry or ready to fight." },
-      { word: "confident", emoji: "👑", type: "Positive", explanation: "Confident means believing in yourself!" },
-      { word: "angry", emoji: "😡", type: "Negative", explanation: "Angry is a strong mad feeling inside." },
-      { word: "joyful", emoji: "🥳", type: "Positive", explanation: "Joyful means filled with great happiness and delight!" },
-      { word: "scared", emoji: "😨", type: "Negative", explanation: "Scared is when something makes you feel afraid." },
-      { word: "doubtful", emoji: "🤔", type: "Negative", explanation: "Doubtful means not being sure if something is true or possible." },
-      { word: "grateful", emoji: "🙏", type: "Positive", explanation: "Grateful means feeling thankful and appreciative!" },
-      { word: "strong", emoji: "🏋️", type: "Positive", explanation: "Strong means feeling powerful and capable." },
-      { word: "unsure", emoji: "❓", type: "Negative", explanation: "Unsure means not knowing what to choose or think." },
-      { word: "loving", emoji: "❤️", type: "Positive", explanation: "Loving means feeling deep care, warmth, and affection." },
-      { word: "disappointed", emoji: "💔", type: "Negative", explanation: "Disappointed is feeling sad when something didn't go as you hoped." }
-    ];
-
-    let currentIndex = 0;
-    let score = 0;
-
-    // Load question UI
-    function loadQuestion() {
-      const q = questions[currentIndex];
-      document.getElementById('question-count').innerText = `Question ${currentIndex + 1}/${questions.length}`;
-      document.getElementById('progress-bar').style.width = `${((currentIndex + 1) / questions.length) * 100}%`;
-      
-      document.getElementById('emoji-display').innerText = q.emoji;
-      document.getElementById('emotion-word').innerText = q.word;
-
-      // Reset animation class
-      const quizScreen = document.getElementById('quiz-screen');
-      quizScreen.classList.remove('card-bounce');
-      void quizScreen.offsetWidth; // trigger reflow
-      quizScreen.classList.add('card-bounce');
-
-      // Auto read out the question word softly
-      setTimeout(() => speakCurrentQuestion(), 300);
-    }
-
-    // Text to Speech
-    function speakCurrentQuestion() {
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel(); // Stop any ongoing speech
-        const q = questions[currentIndex];
-        const utterance = new SpeechSynthesisUtterance(`${q.word}. Is this a positive or negative feeling?`);
-        utterance.rate = 0.9;
-        utterance.pitch = 1.1;
-        window.speechSynthesis.speak(utterance);
-      }
-    }
-
-    // Handle user selection
-    function handleAnswer(selectedType) {
-      window.speechSynthesis?.cancel();
-      const q = questions[currentIndex];
-      const isCorrect = selectedType === q.type;
-
-      const modal = document.getElementById('feedback-modal');
-      const icon = document.getElementById('feedback-icon');
-      const title = document.getElementById('feedback-title');
-      const msg = document.getElementById('feedback-msg');
-
-      if (isCorrect) {
-        score++;
-        icon.innerText = "🌟";
-        title.innerText = "Super Job!";
-        title.className = "text-3xl font-extrabold text-green-600 mb-2";
-        msg.innerText = q.explanation;
-        confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
-        playTone(523.25, 0.2); // C5 cheerful sound
-      } else {
-        icon.innerText = "💡";
-        title.innerText = "Nice Try!";
-        title.className = "text-3xl font-extrabold text-orange-500 mb-2";
-        msg.innerText = `${q.word.toUpperCase()} is actually a ${q.type.toLowerCase()} feeling. ${q.explanation}`;
-        playTone(261.63, 0.3); // Low gentle tone
-      }
-
-      modal.classList.remove('hidden');
-    }
-
-    function nextQuestion() {
-      document.getElementById('feedback-modal').classList.add('hidden');
-      currentIndex++;
-      if (currentIndex < questions.length) {
-        loadQuestion();
-      } else {
-        showResults();
-      }
-    }
-
-    function showResults() {
-      document.getElementById('quiz-screen').classList.add('hidden');
-      document.getElementById('question-count').innerText = "Complete!";
-      document.getElementById('speaker-btn').classList.add('hidden');
-      document.getElementById('results-screen').classList.remove('hidden');
-
-      document.getElementById('final-score').innerText = `${score} / ${questions.length}`;
-
-      const stars = document.getElementById('star-rating');
-      if (score === 10) stars.innerText = "⭐⭐⭐⭐⭐ Super Star!";
-      else if (score >= 7) stars.innerText = "⭐⭐⭐⭐ Great Work!";
-      else if (score >= 5) stars.innerText = "⭐⭐⭐ Good Effort!";
-      else stars.innerText = "⭐ Keep Practicing!";
-
-      confetti({ particleCount: 100, spread: 100, origin: { y: 0.5 } });
-    }
-
-    function restartQuiz() {
-      currentIndex = 0;
-      score = 0;
-      document.getElementById('speaker-btn').classList.remove('hidden');
-      document.getElementById('results-screen').classList.add('hidden');
-      document.getElementById('quiz-screen').classList.remove('hidden');
-      loadQuestion();
-    }
-
-    // Audio beep fallback generator for kid interaction feedback
-    function playTone(freq, duration) {
-      try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.frequency.value = freq;
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
-        osc.stop(audioCtx.currentTime + duration);
-      } catch (e) {
-        // Audio API not permitted/supported without gesture
-      }
-    }
-
-    // Initialize on page load
-    window.onload = function() {
-      loadQuestion();
-    };
-  </script>
 </body>
 </html>
-```
