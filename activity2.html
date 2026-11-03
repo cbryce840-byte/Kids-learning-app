@@ -1,1 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Capital Letter Sentence Builder (Multi-Selection)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Fredoka', cursive, sans-serif;
+      background: linear-gradient(135deg, #f43f5e 0%, #8b5cf6 50%, #06b6d4 100%);
+      min-height: 100vh;
+      user-select: none;
+    }
+    .card-bounce {
+      animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.85); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .icon-bounce {
+      animation: bounce 2s infinite ease-in-out;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+    }
+    .word-chip {
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      cursor: pointer;
+    }
+    .word-chip:active {
+      transform: scale(0.92);
+    }
+    .word-chip.selected {
+      background-color: #fef08a !important;
+      border-color: #eab308 !important;
+      color: #713f12 !important;
+      transform: translateY(-4px) scale(1.06);
+      box-shadow: 0 10px 15px -3px rgba(234, 179, 8, 0.4);
+    }
+    .btn-press:active {
+      transform: scale(0.95);
+    }
+  </style>
+</head>
+<body class="flex flex-col items-center justify-start p-4">
 
+    <!-- HOME MENU BUTTON -->
+    <div class="w-full max-w-lg mb-4">
+        <a href="index.html" style="
+            display: inline-block;
+            padding: 10px 20px;
+            background: #2d3436;
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: bold;
+            font-family: sans-serif;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        ">🏠 Home Menu</a>
+    </div>
+
+  <!-- Main Container -->
+  <div id="app" class="w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden border-8 border-yellow-300 relative min-h-[620px] flex flex-col justify-between p-6">
+    
+    <!-- Top Header & Progress -->
+    <div>
+      <div class="flex items-center justify-between mb-3">
+        <span id="question-count" class="bg-rose-100 text-rose-800 font-bold px-4 py-1.5 rounded-full text-lg border-2 border-rose-300">
+          Sentence 1/30
+        </span>
+        <button id="speaker-btn" onclick="speakCurrentSentence()" class="bg-yellow-400 hover:bg-yellow-300 text-yellow-950 font-bold px-4 py-2 rounded-2xl flex items-center gap-2 shadow-md btn-press border-2 border-yellow-500">
+          <i class="fa-solid fa-volume-high text-xl"></i>
+          <span class="text-base">Listen 🔊</span>
+        </button>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="w-full bg-gray-200 h-4 rounded-full overflow-hidden border-2 border-gray-300 mb-4">
+        <div id="progress-bar" class="bg-gradient-to-r from-yellow-400 to-emerald-400 h-full w-1/30 transition-all duration-300"></div>
+      </div>
+    </div>
+
+    <!-- Quiz Content Area -->
+    <div id="quiz-screen" class="card-bounce flex-grow flex flex-col justify-between items-center text-center my-1">
+      
+      <div>
+        <!-- Graphic Icon -->
+        <div id="sentence-emoji" class="text-5xl mb-2 filter drop-shadow icon-bounce leading-none">
+          🏃
+        </div>
+
+        <!-- Question Prompt -->
+        <p class="text-purple-900 font-extrabold text-lg sm:text-xl mb-3 px-2">
+          Tap <span class="text-rose-600 underline decoration-yellow-400 decoration-4">ALL</span> words that need a <span class="text-rose-600 underline decoration-yellow-400 decoration-4">BIG (Capital)</span> letter!
+        </p>
+
+        <!-- Clickable Word Sentence Container -->
+        <div class="bg-purple-50 border-4 border-dashed border-purple-300 rounded-3xl p-5 w-full mb-3 shadow-inner">
+          <div id="words-container" class="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+            <!-- Interactive Word Chips generated dynamically -->
+          </div>
+        </div>
+
+        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">
+          💡 Some sentences have MORE than 1 capital word!
+        </p>
+      </div>
+
+      <!-- Check Answer Button -->
+      <button id="check-btn" onclick="checkAnswer()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold py-4 px-6 rounded-2xl text-2xl shadow-lg border-b-8 border-emerald-700 btn-press flex items-center justify-center gap-3">
+        <i class="fa-solid fa-circle-check text-3xl"></i> Check My Answer
+      </button>
+
+    </div>
+
+    <!-- Feedback Overlay Modal -->
+    <div id="feedback-modal" class="hidden absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-6 z-20">
+      <div id="feedback-card" class="bg-white rounded-3xl p-6 text-center max-w-sm w-full border-4 border-yellow-400 shadow-2xl card-bounce flex flex-col items-center">
+        <div id="feedback-icon" class="text-6xl mb-2">⭐</div>
+        <h3 id="feedback-title" class="text-3xl font-extrabold text-gray-800 mb-2">Great Job!</h3>
+        <p id="feedback-msg" class="text-lg text-gray-600 mb-6 leading-snug">"she" starts the sentence and "monday" is a day of the week!</p>
+        
+        <div class="flex gap-3 w-full">
+          <button id="next-btn" onclick="closeModal(true)" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 text-lg rounded-2xl shadow-md border-b-4 border-blue-700 btn-press">
+            Next ➔
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Final Results Screen -->
+    <div id="results-screen" class="hidden flex-grow flex flex-col items-center justify-center text-center p-2 card-bounce">
+      <div class="text-7xl mb-2">👑</div>
+      <h2 class="text-3xl font-extrabold text-purple-900 mb-1">Capital Letter Builder!</h2>
+      <p class="text-lg text-gray-600 mb-4">You found all the capital words!</p>
+      
+      <div class="bg-purple-50 rounded-2xl p-5 w-full border-2 border-purple-200 mb-6">
+        <div class="text-gray-500 text-sm font-bold uppercase tracking-wider mb-1">Your Score</div>
+        <div id="final-score" class="text-5xl font-black text-purple-600">30 / 30</div>
+        <div id="star-rating" class="text-3xl mt-2">⭐⭐⭐⭐⭐</div>
+      </div>
+
+      <button onclick="restartQuiz()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-extrabold py-4 rounded-2xl text-2xl shadow-lg border-b-4 border-yellow-600 btn-press flex items-center justify-center gap-2">
+        <i class="fa-solid fa-rotate-right"></i> Play Again!
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    const sentenceBank = [
+      {
+        emoji: "🛍️",
+        words: ["she", "is", "going", "to", "the", "mall", "on", "monday"],
+        targetIndices: [0, 7],
+        explanation: "Fantastic! 'She' starts the sentence and 'Monday' is a day of the week!"
+      },
+      {
+        emoji: "🛝",
+        words: ["max", "and", "dillon", "went", "to", "the", "park"],
+        targetIndices: [0, 2],
+        explanation: "Awesome! Both 'Max' and 'Dillon' are people's names!"
+      },
+      {
+        emoji: "🐶",
+        words: ["i", "love", "my", "dog", "spot"],
+        targetIndices: [0, 4],
+        explanation: "Great job! The word 'I' is always capital, and 'Spot' is a pet's name!"
+      },
+      {
+        emoji: "🍕",
+        words: ["sam", "eats", "pizza", "on", "friday"],
+        targetIndices: [0, 4],
+        explanation: "Super! 'Sam' is a name and 'Friday' is a day of the week!"
+      },
+      {
+        emoji: "🌴",
+        words: ["maya", "flew", "to", "panama"],
+        targetIndices: [0, 3],
+        explanation: "Spot on! 'Maya' is a name and 'Panama' is a country!"
+      },
+      {
+        emoji: "🎮",
+        words: ["ben", "and", "leo", "play", "games"],
+        targetIndices: [0, 2],
+        explanation: "Nice! Both 'Ben' and 'Leo' are names of people!"
+      },
+      {
+        emoji: "🏫",
+        words: ["we", "go", "to", "school", "with", "mr.", "smith"],
+        targetIndices: [0, 5, 6],
+        explanation: "Super star! 'We' starts the sentence, and 'Mr. Smith' is a teacher's name!"
+      },
+      {
+        emoji: "🐱",
+        words: ["lucy", "has", "a", "cat", "named", "whiskers"],
+        targetIndices: [0, 5],
+        explanation: "Great job! 'Lucy' is a person's name and 'Whiskers' is a pet's name!"
+      },
+      {
+        emoji: "🎂",
+        words: ["my", "birthday", "is", "in", "march"],
+        targetIndices: [0, 4],
+        explanation: "Awesome! 'My' starts the sentence and 'March' is a month!"
+      },
+      {
+        emoji: "🏖️",
+        words: ["tom", "goes", "to", "the", "beach", "on", "sunday"],
+        targetIndices: [0, 6],
+        explanation: "Spot on! 'Tom' is a name and 'Sunday' is a day of the week!"
+      },
+      {
+        emoji: "🚗",
+        words: ["i", "drove", "with", "dad", "to", "kingston"],
+        targetIndices: [0, 5],
+        explanation: "You got it! The word 'I' is always capital, and 'Kingston' is a city name!"
+      },
+      {
+        emoji: "⚽",
+        words: ["dillon", "likes", "to", "play", "football"],
+        targetIndices: [0],
+        explanation: "Great job! 'Dillon' is a name and starts the sentence!"
+      },
+      {
+        emoji: "☀️",
+        words: ["the", "sun", "is", "bright", "today"],
+        targetIndices: [0],
+        explanation: "Right on! 'The' is the first word of the sentence!"
+      },
+      {
+        emoji: "📚",
+        words: ["anna", "reads", "books", "on", "tuesday"],
+        targetIndices: [0, 4],
+        explanation: "Terrific! 'Anna' is a name and 'Tuesday' is a day of the week!"
+      },
+      {
+        emoji: "🐕",
+        words: ["rex", "barks", "at", "the", "cat"],
+        targetIndices: [0],
+        explanation: "Nice work! 'Rex' is a pet's name and starts the sentence!"
+      },
+      {
+        emoji: "🎄",
+        words: ["we", "get", "presents", "at", "christmas"],
+        targetIndices: [0, 4],
+        explanation: "Awesome! 'We' starts the sentence and 'Christmas' is a holiday name!"
+      },
+      {
+        emoji: "🚲",
+        words: ["alex", "and", "i", "ride", "bikes"],
+        targetIndices: [0, 2],
+        explanation: "Super! 'Alex' is a name and 'I' is always written as a capital letter!"
+      },
+      {
+        emoji: "🍦",
+        words: ["lisa", "buys", "ice", "cream", "on", "saturday"],
+        targetIndices: [0, 5],
+        explanation: "Fantastic! 'Lisa' is a name and 'Saturday' is a day of the week!"
+      },
+      {
+        emoji: "🩺",
+        words: ["dr.", "brown", "helps", "sick", "pets"],
+        targetIndices: [0, 1],
+        explanation: "Spot on! Both 'Dr.' and 'Brown' make up the doctor's name!"
+      },
+      {
+        emoji: "👦",
+        words: ["jack", "and", "jill", "went", "up", "the", "hill"],
+        targetIndices: [0, 2],
+        explanation: "Great job! Both 'Jack' and 'Jill' are names of people!"
+      },
+      {
+        emoji: "🏊",
+        words: ["i", "can", "swim", "very", "fast"],
+        targetIndices: [0],
+        explanation: "Awesome! 'I' is the first word and is always a capital letter!"
+      },
+      {
+        emoji: "🎈",
+        words: ["mia", "has", "a", "party", "in", "may"],
+        targetIndices: [0, 5],
+        explanation: "Terrific! 'Mia' is a name and 'May' is a month!"
+      },
+      {
+        emoji: "🦆",
+        words: ["the", "duck", "swam", "with", "flippy"],
+        targetIndices: [0, 4],
+        explanation: "Nice! 'The' starts the sentence and 'Flippy' is a pet's name!"
+      },
+      {
+        emoji: "🏝️",
+        words: ["we", "love", "living", "in", "jamaica"],
+        targetIndices: [0, 4],
+        explanation: "Super! 'We' starts the sentence and 'Jamaica' is a country name!"
+      },
+      {
+        emoji: "🥪",
+        words: ["sam", "makes", "a", "sandwich", "for", "max"],
+        targetIndices: [0, 5],
+        explanation: "Fantastic! Both 'Sam' and 'Max' are names!"
+      },
+      {
+        emoji: "🎨",
+        words: ["grace", "paints", "pictures", "on", "wednesday"],
+        targetIndices: [0, 4],
+        explanation: "Spot on! 'Grace' is a name and 'Wednesday' is a day of the week!"
+      },
+      {
+        emoji: "👨‍🏫",
+        words: ["our", "teacher", "is", "mr.", "davis"],
+        targetIndices: [0, 3, 4],
+        explanation: "Super star! 'Our' starts the sentence, and 'Mr. Davis' is a name!"
+      },
+      {
+        emoji: "🍎",
+        words: ["i", "ate", "an", "apple", "on", "thursday"],
+        targetIndices: [0, 5],
+        explanation: "You got it! 'I' is always capital, and 'Thursday' is a day of the week!"
+      },
+      {
+        emoji: "🚀",
+        words: ["leo", "wants", "to", "fly", "to", "mars"],
+        targetIndices: [0, 5],
+        explanation: "Great job! 'Leo' is a person's name and 'Mars' is a planet name!"
+      },
+      {
+        emoji: "🎁",
+        words: ["dillon", "got", "a", "gift", "from", "santa"],
+        targetIndices: [0, 5],
+        explanation: "Awesome! Both 'Dillon' and 'Santa' are names!"
+      }
+    ];
+
+    let questions = [];
+    let currentIndex = 0;
+    let score = 0;
+    let selectedIndices = new Set();
+
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function loadQuestion() {
+      selectedIndices.clear();
+      const q = questions[currentIndex];
+      document.getElementById('question-count').innerText = `Sentence ${currentIndex + 1}/${questions.length}`;
+      document.getElementById('progress-bar').style.width = `${((currentIndex + 1) / questions.length) * 100}%`;
+      
+      document.getElementById('sentence-emoji').innerText = q.emoji;
+
+      const container = document.getElementById('words-container');
+      container.innerHTML = '';
+
+      q.words.forEach((word, idx) => {
+        const chip = document.createElement('button');
+        chip.onclick = () => toggleWordSelection(idx, chip);
+        chip.id = `word-chip-${idx}`;
+        chip.className = "word-chip bg-white hover:bg-yellow-50 text-purple-900 font-extrabold px-4 py-3 rounded-2xl text-2xl border-4 border-purple-200 shadow-md flex items-center justify-center gap-1";
+        chip.innerHTML = `<span>${word}</span>`;
+        container.appendChild(chip);
+      });
+
+      const quizScreen = document.getElementById('quiz-screen');
+      quizScreen.classList.remove('card-bounce');
+      void quizScreen.offsetWidth;
+      quizScreen.classList.add('card-bounce');
+
+      setTimeout(() => speakCurrentSentence(), 300);
+    }
+
+    function toggleWordSelection(index, chipElement) {
+      if (selectedIndices.has(index)) {
+        selectedIndices.delete(index);
+        chipElement.classList.remove('selected');
+      } else {
+        selectedIndices.add(index);
+        chipElement.classList.add('selected');
+        playTone(440, 0.1);
+      }
+    }
+
+    function speakCurrentSentence() {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const q = questions[currentIndex];
+        const fullText = q.words.join(" ");
+        const utterance = new SpeechSynthesisUtterance(fullText);
+        utterance.rate = 0.85;
+        utterance.pitch = 1.1;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    function speakText(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 0.9;
+        utterance.pitch = 1.1;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    function checkAnswer() {
+      window.speechSynthesis?.cancel();
+      const q = questions[currentIndex];
+      const targets = new Set(q.targetIndices);
+
+      const isExactMatch = selectedIndices.size === targets.size && [...selectedIndices].every(i => targets.has(i));
+
+      const modal = document.getElementById('feedback-modal');
+      const icon = document.getElementById('feedback-icon');
+      const title = document.getElementById('feedback-title');
+      const msg = document.getElementById('feedback-msg');
+      const nextBtn = document.getElementById('next-btn');
+
+      if (isExactMatch) {
+        score++;
+        icon.innerText = "⭐";
+        title.innerText = "Super Star!";
+        title.className = "text-3xl font-extrabold text-green-600 mb-2";
+        msg.innerText = q.explanation;
+        
+        nextBtn.innerText = "Next ➔";
+        
+        confetti({ particleCount: 60, spread: 70, origin: { y: 0.7 } });
+        playTone(523.25, 0.25);
+        speakText(q.explanation);
+      } else {
+        icon.innerText = "💡";
+        title.innerText = "Good Effort!";
+        title.className = "text-3xl font-extrabold text-orange-500 mb-2";
+
+        msg.innerText = q.explanation;
+        nextBtn.innerText = "Next ➔";
+
+        playTone(220.00, 0.3);
+        speakText(q.explanation);
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeModal(advance) {
+      document.getElementById('feedback-modal').classList.add('hidden');
+      if (advance) {
+        currentIndex++;
+        if (currentIndex < questions.length) {
+          loadQuestion();
+        } else {
+          showResults();
+        }
+      }
+    }
+
+    function showResults() {
+      document.getElementById('quiz-screen').classList.add('hidden');
+      document.getElementById('question-count').innerText = "Finished!";
+      document.getElementById('speaker-btn').classList.add('hidden');
+      document.getElementById('results-screen').classList.remove('hidden');
+
+      document.getElementById('final-score').innerText = `${score} / ${questions.length}`;
+
+      const stars = document.getElementById('star-rating');
+      if (score === 30) stars.innerText = "⭐⭐⭐⭐⭐ Perfect 30/30!";
+      else if (score >= 24) stars.innerText = "⭐⭐⭐⭐ Super Star!";
+      else if (score >= 15) stars.innerText = "⭐⭐⭐ Good Effort!";
+      else stars.innerText = "⭐ Keep Practicing!";
+
+      confetti({ particleCount: 150, spread: 110, origin: { y: 0.5 } });
+      speakText(`Congratulations! You finished the quiz with a score of ${score} out of 30!`);
+    }
+
+    function restartQuiz() {
+      currentIndex = 0;
+      score = 0;
+      questions = shuffleArray(sentenceBank);
+      document.getElementById('speaker-btn').classList.remove('hidden');
+      document.getElementById('results-screen').classList.add('hidden');
+      document.getElementById('quiz-screen').classList.remove('hidden');
+      loadQuestion();
+    }
+
+    function playTone(freq, duration) {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.frequency.value = freq;
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    window.onload = function() {
+      questions = shuffleArray(sentenceBank);
+      loadQuestion();
+    };
+  </script>
+</body>
+</html>
