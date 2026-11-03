@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Manners & Feelings Academy</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@600;700&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Quicksand', sans-serif; background: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 99%); touch-action: manipulation; }
+    .font-fredoka { font-family: 'Fredoka One', cursive; }
+    .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15); }
+    .btn-bounce:active { transform: scale(0.95); }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-between p-4 sm:p-6 text-slate-800 select-none">
+
+  <header class="w-full max-w-3xl flex flex-col items-center gap-3">
+    <div class="w-full flex justify-between items-center bg-white/80 backdrop-blur-md px-6 py-3 rounded-full card-shadow border-4 border-pink-300">
+      <a href="index.html" class="bg-amber-400 hover:bg-amber-500 text-white font-fredoka px-4 py-2 rounded-full text-lg btn-bounce">🏠 Home</a>
+      <div id="badge-category" class="bg-purple-500 text-white font-fredoka px-4 py-2 rounded-full text-sm sm:text-lg">Manners & Feelings</div>
+      <button onclick="readQuestionAloud()" class="bg-sky-400 text-white p-3 rounded-full text-xl shadow btn-bounce">🔊</button>
+    </div>
+    <div class="w-full bg-white/60 rounded-full h-6 border-2 border-pink-300 overflow-hidden p-1 card-shadow">
+      <div id="progress-bar" class="bg-gradient-to-r from-emerald-400 to-teal-500 h-full rounded-full transition-all duration-500" style="width: 3.33%;"></div>
+    </div>
+    <div class="text-right w-full pr-2 text-sm font-bold text-pink-700 font-fredoka">Mission <span id="current-mission-num">1</span> of 30</div>
+  </header>
+
+  <main class="w-full max-w-3xl my-auto py-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 card-shadow border-8 border-yellow-300 flex flex-col items-center text-center">
+      <div id="character-box" class="w-full bg-gradient-to-b from-sky-100 to-indigo-50 rounded-2xl p-6 mb-6 border-4 border-dashed border-sky-300 flex flex-col items-center justify-center min-h-[160px]">
+        <div id="scenario-emoji" class="text-7xl mb-2 animate-bounce">🍦</div>
+        <div id="character-name" class="font-fredoka text-xl text-indigo-600 bg-white px-4 py-1 rounded-full shadow">Meet Tom</div>
+      </div>
+      <h2 id="scenario-prompt" class="text-2xl sm:text-3xl font-bold text-slate-700 mb-6 font-fredoka">Tom dropped his ice cream! How does Tom feel?</h2>
+      <div id="options-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full"></div>
+    </div>
+  </main>
+
+  <div id="completion-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-3xl p-8 max-w-md w-full text-center border-8 border-emerald-400 card-shadow flex flex-col items-center">
+      <div class="text-7xl mb-4 animate-bounce">🌟</div>
+      <h3 class="text-4xl font-fredoka text-emerald-500 mb-2">Awesome Job!</h3>
+      <p class="text-xl font-bold text-slate-600 mb-6">You finished all 30 missions!</p>
+      <div class="flex gap-4 w-full">
+        <button onclick="restartGame()" class="flex-1 bg-emerald-500 text-white font-fredoka py-3 rounded-2xl text-xl btn-bounce">Play Again 🔄</button>
+        <a href="index.html" class="flex-1 bg-amber-400 text-white font-fredoka py-3 rounded-2xl text-xl btn-bounce flex items-center justify-center">Home 🏠</a>
+      </div>
+    </div>
+  </div>
+  <script>
+    const missionPool = [
+      { category: "Manners", emoji: "🎁", character: "Maya & Grandmama", prompt: "Grandmama gives Maya a birthday present. What should Maya say?", options: ["Thank you!", "No way!", "Give me more!", "Goodbye!"], correct: 0, speech: "Grandmama gives Maya a birthday present. What should Maya say?" },
+      { category: "Manners", emoji: "🧸", character: "Leo & Dillon", prompt: "Leo wants to play with Dillon's toy truck. What should Leo ask?", options: ["Can I please play with that?", "Gimme that right now!", "Mine!", "Go away!"], correct: 0, speech: "Leo wants to play with Dillon's toy truck. What should Leo ask?" },
+      { category: "Manners", emoji: "🥛", character: "Sam at the Table", prompt: "Sam accidentally spills his cup of juice. What polite words should Sam say?", options: ["I am sorry!", "It was you!", "Laugh loudly", "Run away"], correct: 0, speech: "Sam accidentally spills his cup of juice. What polite words should Sam say?" },
+      { category: "Manners", emoji: "🚪", character: "Ella at the Door", prompt: "Ella sees someone walking behind her with heavy boxes. What should Ella do?", options: ["Hold the door open", "Slam the door", "Run fast inside", "Ignore them"], correct: 0, speech: "Ella sees someone walking behind her with heavy boxes. What should Ella do?" },
+      { category: "Manners", emoji: "🍏", character: "Noah at Lunch", prompt: "Noah wants an apple from across the table. What does Noah say?", options: ["Please pass the apple", "Gimme apple!", "Reach and grab it", "Yell loud"], correct: 0, speech: "Noah wants an apple from across the table. What does Noah say?" },
+      { category: "Manners", emoji: "🗣️", character: "Chloe & Mom", prompt: "Mom is talking on the phone and Chloe needs help. What should Chloe say?", options: ["Excuse me, Mom", "Scream loudly", "Take the phone", "Cry out loud"], correct: 0, speech: "Mom is talking on the phone and Chloe needs help. What should Chloe say?" },
+      { category: "Manners", emoji: "🚲", character: "Ben & Friend", prompt: "Ben bumps his bike into his friend by mistake. What does Ben say?", options: ["Oops, I am sorry!", "Watch out!", "It is your fault!", "Ha ha!"], correct: 0, speech: "Ben bumps his bike into his friend by mistake. What does Ben say?" },
+      { category: "Manners", emoji: "🙋‍♂️", character: "Classroom Time", prompt: "Teacher asks a question in class. How should Dillon answer politely?", options: ["Raise a quiet hand", "Shout out loud", "Stand on the chair", "Make loud sounds"], correct: 0, speech: "Teacher asks a question in class. How should Dillon answer politely?" },
+      { category: "Manners", emoji: "🧁", character: "Mia's Treat", prompt: "Mia's aunt offers her a tasty cupcake. Mia takes it and says...?", options: ["Thank you very much!", "I want two!", "Yuck!", "Nothing at all"], correct: 0, speech: "Mia's aunt offers her a tasty cupcake. Mia takes it and says what?" },
+      { category: "Manners", emoji: "😴", character: "Bedtime Routine", prompt: "Dillon is going to sleep. What polite words does Dillon say to family?", options: ["Goodnight!", "Be quiet!", "I want toys!", "Turn on lights!"], correct: 0, speech: "Dillon is going to sleep. What polite words does Dillon say to family?" },
+      { category: "Manners", emoji: "🎨", character: "Art Class", prompt: "Lucas finishes using the blue crayon. What should Lucas do?", options: ["Share it with a friend", "Hide the crayon", "Break the crayon", "Throw it on the floor"], correct: 0, speech: "Lucas finishes using the blue crayon. What should Lucas do?" },
+      { category: "Manners", emoji: "🤧", character: "Ethan's Sneeze", prompt: "Ethan sneezes near his friends. What is the polite thing to do?", options: ["Cover with elbow & say excuse me", "Sneeze on toys", "Laugh out loud", "Say nothing"], correct: 0, speech: "Ethan sneezes near his friends. What is the polite thing to do?" },
+      { category: "Manners", emoji: "🤝", character: "New Neighbor", prompt: "Dillon meets a new friend at the park. What is a polite greeting?", options: ["Hi, nice to meet you!", "Who are you?", "Go away!", "Turn around"], correct: 0, speech: "Dillon meets a new friend at the park. What is a polite greeting?" },
+      { category: "Manners", emoji: "🧹", character: "Toy Clean-up", prompt: "Playtime is finished! What polite helper action should we do?", options: ["Clean up toys together", "Leave toys everywhere", "Kick the blocks", "Run outside"], correct: 0, speech: "Playtime is finished! What polite helper action should we do?" },
+      { category: "Manners", emoji: "🍽️", character: "Dinner Time", prompt: "When finishing dinner at the table, what is a polite phrase to use?", options: ["May I please be excused?", "I am leaving now!", "Push plate away", "Drop the spoon"], correct: 0, speech: "When finishing dinner at the table, what is a polite phrase to use?" },
+      { category: "Feelings", emoji: "🍦😭", character: "Tom with Ice Cream", prompt: "Tom dropped his ice cream cone on the ground! Tom feels...?", options: ["Sad 😢", "Excited 🤩", "Sleepy 😴", "Scared 😱"], correct: 0, speech: "Tom dropped his ice cream cone on the ground! Tom feels what?" },
+      { category: "Feelings", emoji: "🎈😄", character: "Lily at the Party", prompt: "Lily gets a big red balloon at her birthday party! Lily feels...?", options: ["Happy 😄", "Angry 😡", "Sad 😢", "Tired 🥱"], correct: 0, speech: "Lily gets a big red balloon at her birthday party! Lily feels what?" },
+      { category: "Feelings", emoji: "⚡🫣", character: "Noah in the Dark", prompt: "Noah hears loud thunder during a big night storm. Noah feels...?", options: ["Scared 😱", "Happy 😊", "Silly 😜", "Hungry 🍕"], correct: 0, speech: "Noah hears loud thunder during a big night storm. Noah feels what?" },
+      { category: "Feelings", emoji: "🧱😡", character: "Jack's Block Tower", prompt: "Jack's big block tower was knocked over by accident! Jack feels...?", options: ["Angry 😡", "Proud 😎", "Sleepy 😴", "Happy 😄"], correct: 0, speech: "Jack's big block tower was knocked over by accident! Jack feels what?" },
+      { category: "Feelings", emoji: "🏆😎", character: "Dillon's Good Work", prompt: "Dillon finished all his learning games and got a gold star! Dillon feels...?", options: ["Proud 😎", "Sad 😢", "Scared 😱", "Bored 🥱"], correct: 0, speech: "Dillon finished all his learning games and got a gold star! Dillon feels what?" },
+      { category: "Feelings", emoji: "🛌🥱", character: "Zoe after Playing", prompt: "Zoe played at the park all day long and is yawning. Zoe feels...?", options: ["Tired 🥱", "Angry 😡", "Scared 😱", "Excited 🤩"], correct: 0, speech: "Zoe played at the park all day long and is yawning. Zoe feels what?" },
+      { category: "Feelings", emoji: "🎁🤩", character: "Mason's Surprise", prompt: "Mason opens a surprise box and sees a brand new toy! Mason feels...?", options: ["Excited 🤩", "Sad 😢", "Angry 😡", "Scared 😱"], correct: 0, speech: "Mason opens a surprise box and sees a brand new toy! Mason feels what?" },
+      { category: "Feelings", emoji: "🤕🥺", character: "Emma's Knee", prompt: "Emma tripped and fell while running. Her knee hurts. Emma feels...?", options: ["Hurt & Sad 🥺", "Funny 🤪", "Excited 🎉", "Proud 😎"], correct: 0, speech: "Emma tripped and fell while running. Her knee hurts. Emma feels what?" },
+      { category: "Feelings", emoji: "🎨🥳", character: "Oliver's Painting", prompt: "Oliver painted a rainbow picture and showed his mom! Oliver feels...?", options: ["Joyful 🥳", "Scared 😱", "Angry 😡", "Sleepy 😴"], correct: 0, speech: "Oliver painted a rainbow picture and showed his mom! Oliver feels what?" },
+      { category: "Feelings", emoji: "🌧️😒", character: "Rainy Day Sam", prompt: "Sam wanted to play outside, but it started raining heavily. Sam feels...?", options: ["Disappointed 😒", "Excited 🤩", "Scared 😱", "Silly 😜"], correct: 0, speech: "Sam wanted to play outside, but it started raining heavily. Sam feels what?" },
+      { category: "Feelings", emoji: "🐕‍🦺🥰", character: "Puppy Love", prompt: "Maya is cuddling a cute, soft little puppy. Maya feels...?", options: ["Loved & Calm 🥰", "Angry 😡", "Scared 😱", "Sad 😢"], correct: 0, speech: "Maya is cuddling a cute, soft little puppy. Maya feels what?" },
+      { category: "Feelings", emoji: "🥪😋", character: "Lunchtime Ben", prompt: "Ben's tummy is making noise and he sees his sandwich. Ben feels...?", options: ["Hungry 😋", "Sleepy 😴", "Scared 😱", "Angry 😡"], correct: 0, speech: "Ben's tummy is making noise and he sees his sandwich. Ben feels what?" },
+      { category: "Feelings", emoji: "🧩🤔", character: "Tricky Puzzle", prompt: "Ava is trying to figure out where the last puzzle piece goes. Ava feels...?", options: ["Curious & Thinking 🤔", "Angry 😡", "Sad 😢", "Sleepy 😴"], correct: 0, speech: "Ava is trying to figure out where the last puzzle piece goes. Ava feels what?" },
+      { category: "Feelings", emoji: "🤪😜", character: "Silly Dillon", prompt: "Dillon puts a funny hat on his head and makes funny faces! Dillon feels...?", options: ["Silly 😜", "Sad 😢", "Scared 😱", "Angry 😡"], correct: 0, speech: "Dillon puts a funny hat on his head and makes funny faces! Dillon feels what?" },
+      { category: "Feelings", emoji: "💤😴", character: "Bedtime Story", prompt: "Mom reads a quiet story while the lights are soft. Dillon feels...?", options: ["Sleepy & Relaxed 😴", "Excited 🤩", "Angry 😡", "Scared 😱"], correct: 0, speech: "Mom reads a quiet story while the lights are soft. Dillon feels what?" }
+    ];
+
+    let currentMissions = [];
+    let currentIndex = 0;
+
+    function shuffleArray(array) {
+      return array.map(value => ({ value, sort: Math.random() })).sort((a, b) => a.sort - b.sort).map(({ value }) => value);
+    }
+
+    function initGame() {
+      currentMissions = shuffleArray([...missionPool]);
+      currentIndex = 0;
+      loadMission();
+    }
+
+    function loadMission() {
+      if (currentIndex >= currentMissions.length) {
+        document.getElementById('completion-modal').classList.remove('hidden');
+        speakText("Great job Dillon! You finished all your missions!");
+        return;
+      }
+      const mission = currentMissions[currentIndex];
+      document.getElementById('current-mission-num').innerText = currentIndex + 1;
+      document.getElementById('progress-bar').style.width = `${((currentIndex + 1) / 30) * 100}%`;
+      document.getElementById('badge-category').innerText = mission.category;
+      document.getElementById('scenario-emoji').innerText = mission.emoji;
+      document.getElementById('character-name').innerText = mission.character;
+      document.getElementById('scenario-prompt').innerText = mission.prompt;
+
+      const optionObjects = mission.options.map((opt, idx) => ({ text: opt, isCorrect: idx === mission.correct }));
+      const shuffledOptions = shuffleArray(optionObjects);
+      const optionsContainer = document.getElementById('options-grid');
+      optionsContainer.innerHTML = '';
+
+      const colorPalette = ['bg-blue-400 border-blue-600', 'bg-emerald-400 border-emerald-600', 'bg-purple-400 border-purple-600', 'bg-amber-400 border-amber-600'];
+
+      shuffledOptions.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = `${colorPalette[idx % 4]} text-white font-fredoka text-xl sm:text-2xl p-4 rounded-2xl border-b-4 card-shadow btn-bounce min-h-[70px]`;
+        btn.innerText = opt.text;
+        btn.onclick = () => handleAnswer(opt.isCorrect, btn);
+        optionsContainer.appendChild(btn);
+      });
+      readQuestionAloud();
+    }
+
+    function handleAnswer(isCorrect, btnElement) {
+      if (isCorrect) {
+        btnElement.classList.add('bg-green-500', 'border-green-700', 'scale-105');
+        speakText("Great job!");
+        setTimeout(() => { currentIndex++; loadMission(); }, 1200);
+      } else {
+        btnElement.classList.add('bg-red-400', 'animate-shake');
+        speakText("Try again!");
+        setTimeout(() => btnElement.classList.remove('animate-shake'), 500);
+      }
+    }
+
+    function readQuestionAloud() {
+      speakText(currentMissions[currentIndex].speech);
+    }
+
+    function speakText(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 0.9; utterance.pitch = 1.1;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    function restartGame() {
+      document.getElementById('completion-modal').classList.add('hidden');
+      initGame();
+    }
+
+    window.onload = initGame;
+  </script>
+</body>
+</html>
