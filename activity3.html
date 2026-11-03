@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Prepositions Adventure Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spanish Numbers 1-20 Quiz</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -11,7 +11,7 @@
   <style>
     body {
       font-family: 'Fredoka', cursive, sans-serif;
-      background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 50%, #a855f7 100%);
+      background: linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #ec4899 100%);
       min-height: 100vh;
       user-select: none;
       display: flex;
@@ -20,7 +20,6 @@
       justify-content: flex-start;
       padding: 16px;
       margin: 0;
-      touch-action: none; /* Prevents default page scrolling while dragging */
     }
     .card-bounce {
       animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -29,14 +28,12 @@
       0% { transform: scale(0.85); opacity: 0; }
       100% { transform: scale(1); opacity: 1; }
     }
-    .draggable-item {
-      cursor: grab;
-      touch-action: none;
-      transition: filter 0.2s;
+    .icon-bounce {
+      animation: bounce 2s infinite ease-in-out;
     }
-    .draggable-item:active {
-      cursor: grabbing;
-      transform: scale(1.1);
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
     }
     .btn-press:active {
       transform: scale(0.95);
@@ -46,7 +43,7 @@
 <body>
 
     <!-- HOME MENU BUTTON -->
-    <div class="w-full max-w-lg mb-3">
+    <div class="w-full max-w-lg mb-4">
         <a href="index.html" style="
             display: inline-block;
             padding: 10px 20px;
@@ -61,75 +58,59 @@
     </div>
 
   <!-- Main Container -->
-  <div id="app" class="w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden border-8 border-yellow-300 relative min-h-[620px] flex flex-col justify-between p-5">
+  <div id="app" class="w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden border-8 border-yellow-300 relative min-h-[600px] flex flex-col justify-between p-6">
     
     <!-- Top Header & Progress -->
     <div>
-      <div class="flex items-center justify-between mb-2">
-        <span id="question-count" class="bg-indigo-100 text-indigo-900 font-bold px-4 py-1.5 rounded-full text-lg border-2 border-indigo-300">
-          Mission 1/25
+      <div class="flex items-center justify-between mb-3">
+        <span id="question-count" class="bg-amber-100 text-amber-900 font-bold px-4 py-1.5 rounded-full text-lg border-2 border-amber-300">
+          Question 1/20
         </span>
-        <button id="speaker-btn" onclick="speakCurrentSentence()" class="bg-yellow-400 hover:bg-yellow-300 text-yellow-950 font-bold px-3 py-1.5 rounded-2xl flex items-center gap-2 shadow-md btn-press border-2 border-yellow-500">
-          <i class="fa-solid fa-volume-high text-lg"></i>
-          <span class="text-sm">Listen 🔊</span>
+        <button id="speaker-btn" onclick="speakCurrentQuestion()" class="bg-yellow-400 hover:bg-yellow-300 text-yellow-950 font-bold px-4 py-2 rounded-2xl flex items-center gap-2 shadow-md btn-press border-2 border-yellow-500">
+          <i class="fa-solid fa-volume-high text-xl"></i>
+          <span class="text-base">Listen 🔊</span>
         </button>
       </div>
 
       <!-- Progress Bar -->
-      <div class="w-full bg-gray-200 h-3 rounded-full overflow-hidden border-2 border-gray-300 mb-3">
-        <div id="progress-bar" class="bg-gradient-to-r from-yellow-400 to-emerald-400 h-full w-1/25 transition-all duration-300"></div>
+      <div class="w-full bg-gray-200 h-4 rounded-full overflow-hidden border-2 border-gray-300 mb-4">
+        <div id="progress-bar" class="bg-gradient-to-r from-yellow-400 to-emerald-400 h-full w-1/20 transition-all duration-300"></div>
       </div>
     </div>
 
-    <!-- Gameplay Area -->
-    <div id="quiz-screen" class="card-bounce flex-grow flex flex-col justify-between items-center text-center">
-      
-      <!-- Instruction Prompt -->
-      <div class="bg-indigo-50 border-3 border-indigo-200 rounded-2xl p-3 w-full shadow-inner mb-2">
-        <p class="text-indigo-950 font-extrabold text-lg sm:text-xl leading-snug" id="sentence-prompt">
-          Move the dinosaur <span class="text-rose-600 underline decoration-yellow-400 decoration-3" id="target-preposition">under</span> the rock!
-        </p>
+    <!-- Quiz Content Area -->
+    <div id="quiz-screen" class="card-bounce flex-grow flex flex-col justify-between items-center text-center my-1">
+      <div class="w-full">
+        <!-- Big Number / Emoji Display -->
+        <div id="number-badge" class="bg-amber-50 border-4 border-amber-300 rounded-3xl p-4 mb-3 shadow-inner flex flex-col items-center justify-center min-h-[140px]">
+          <div id="big-number" class="text-6xl font-black text-amber-600 icon-bounce mb-1">
+            5
+          </div>
+          <div id="emoji-counter" class="text-2xl tracking-widest break-words leading-relaxed px-2">
+            🍎 🍎 🍎 🍎 🍎
+          </div>
+        </div>
+
+        <!-- Question Prompt -->
+        <h2 id="question-text" class="text-2xl font-extrabold text-amber-950 mb-4 px-2">
+          What is the Spanish word for 5?
+        </h2>
+
+        <!-- Options Container -->
+        <div id="options-container" class="w-full grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2">
+          <!-- Buttons generated dynamically -->
+        </div>
       </div>
-
-      <!-- Interactive Playground Box -->
-      <div id="playground" class="relative w-full h-[260px] bg-gradient-to-b from-sky-200 to-emerald-200 rounded-3xl border-4 border-indigo-300 overflow-hidden shadow-inner flex items-center justify-center">
-        
-        <!-- Background Scene Decor -->
-        <div class="absolute bottom-2 left-3 text-4xl">🌱</div>
-        <div class="absolute bottom-2 right-3 text-4xl">🌸</div>
-
-        <!-- Target Object (e.g. Rock / Log / Box) -->
-        <div id="scene-object" class="absolute text-7xl select-none filter drop-shadow-md z-10">
-          🪨
-        </div>
-
-        <!-- Movable Dinosaur Character -->
-        <div id="dinosaur" class="draggable-item absolute text-7xl select-none filter drop-shadow-xl z-20" style="left: 30px; bottom: 20px;">
-          🦖
-        </div>
-
-        <!-- Hint Overlay Target Zones (Visual guide lines for kids) -->
-        <div id="drop-hint" class="absolute border-2 border-dashed border-rose-400 rounded-full w-20 h-20 opacity-40 pointer-events-none hidden flex items-center justify-center text-xs font-bold text-rose-600">
-          Target
-        </div>
-
-      </div>
-
-      <!-- Check Position Button -->
-      <button onclick="checkPosition()" class="w-full mt-3 bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold py-3 px-6 rounded-2xl text-xl shadow-lg border-b-6 border-emerald-700 btn-press flex items-center justify-center gap-2">
-        <i class="fa-solid fa-circle-check text-2xl"></i> Check My Spot!
-      </button>
-
     </div>
 
     <!-- Feedback Overlay Modal -->
-    <div id="feedback-modal" class="hidden absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-6 z-30">
+    <div id="feedback-modal" class="hidden absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-6 z-20">
       <div id="feedback-card" class="bg-white rounded-3xl p-6 text-center max-w-sm w-full border-4 border-yellow-400 shadow-2xl card-bounce flex flex-col items-center">
         <div id="feedback-icon" class="text-6xl mb-2">⭐</div>
-        <h3 id="feedback-title" class="text-3xl font-extrabold text-gray-800 mb-2">Great Job!</h3>
-        <p id="feedback-msg" class="text-lg text-gray-600 mb-6 leading-snug">You placed the dinosaur correctly!</p>
+        <h3 id="feedback-title" class="text-3xl font-extrabold text-gray-800 mb-2">¡Excelente!</h3>
+        <p id="feedback-msg" class="text-lg text-gray-600 mb-6 leading-snug">5 in Spanish is "cinco"!</p>
         
-        <button onclick="nextMission()" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 text-xl rounded-2xl shadow-md border-b-4 border-blue-700 btn-press">
+        <button id="next-btn" onclick="nextQuestion()" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 text-xl rounded-2xl shadow-md border-b-4 border-blue-700 btn-press">
           Next ➔
         </button>
       </div>
@@ -137,17 +118,17 @@
 
     <!-- Final Results Screen -->
     <div id="results-screen" class="hidden flex-grow flex flex-col items-center justify-center text-center p-2 card-bounce">
-      <div class="text-7xl mb-2">🏆</div>
-      <h2 class="text-3xl font-extrabold text-indigo-900 mb-1">Preposition Master!</h2>
-      <p class="text-lg text-gray-600 mb-4">You completed all 25 dinosaur missions!</p>
+      <div class="text-7xl mb-2">🎉</div>
+      <h2 class="text-3xl font-extrabold text-amber-900 mb-1">¡Muy Bien!</h2>
+      <p class="text-lg text-gray-600 mb-4">You know your Spanish Numbers 1-20!</p>
       
-      <div class="bg-indigo-50 rounded-2xl p-5 w-full border-2 border-indigo-200 mb-6">
+      <div class="bg-amber-50 rounded-2xl p-5 w-full border-2 border-amber-200 mb-6">
         <div class="text-gray-500 text-sm font-bold uppercase tracking-wider mb-1">Your Score</div>
-        <div id="final-score" class="text-5xl font-black text-indigo-600">25 / 25</div>
+        <div id="final-score" class="text-5xl font-black text-amber-600">20 / 20</div>
         <div id="star-rating" class="text-3xl mt-2">⭐⭐⭐⭐⭐</div>
       </div>
 
-      <button onclick="restartAdventure()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-extrabold py-4 rounded-2xl text-2xl shadow-lg border-b-4 border-yellow-600 btn-press flex items-center justify-center gap-2">
+      <button onclick="restartQuiz()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-extrabold py-4 rounded-2xl text-2xl shadow-lg border-b-4 border-yellow-600 btn-press flex items-center justify-center gap-2">
         <i class="fa-solid fa-rotate-right"></i> Play Again!
       </button>
     </div>
@@ -155,44 +136,32 @@
   </div>
 
   <script>
-    // 25 Preposition Missions with target zones and object emojis
-    const prepositionBank = [
-      { prep: "under", objectEmoji: "🪨", objectName: "rock", targetPosition: {x: 200, y: 140}, explanation: "The dinosaur is underneath the rock!" },
-      { prep: "on top of", objectEmoji: "📦", objectName: "box", targetPosition: {x: 200, y: 30}, explanation: "The dinosaur is resting right on top of the box!" },
-      { prep: "next to", objectEmoji: "🪵", objectName: "log", targetPosition: {x: 320, y: 140}, explanation: "The dinosaur is sitting right next to the log!" },
-      { prep: "behind", objectEmoji: "🌳", objectName: "tree", targetPosition: {x: 60, y: 140}, explanation: "The dinosaur is hiding behind the tree!" },
-      { prep: "in front of", objectEmoji: "⛺", objectName: "tent", targetPosition: {x: 200, y: 160}, explanation: "The dinosaur is standing right in front of the tent!" },
-      { prep: "above", objectEmoji: "☁️", objectName: "cloud", targetPosition: {x: 200, y: 20}, explanation: "The dinosaur is soaring high up above!" },
-      { prep: "beside", objectEmoji: "🍄", objectName: "mushroom", targetPosition: {x: 310, y: 150}, explanation: "The dinosaur is right beside the mushroom!" },
-      { prep: "near", objectEmoji: "🌊", objectName: "water pond", targetPosition: {x: 100, y: 140}, explanation: "The dinosaur is playing near the water!" },
-      { prep: "below", objectEmoji: "⭐", objectName: "star sign", targetPosition: {x: 200, y: 180}, explanation: "The dinosaur is down below!" },
-      { prep: "on", objectEmoji: "🛝", objectName: "slide", targetPosition: {x: 200, y: 40}, explanation: "The dinosaur is on the playground equipment!" },
-      { prep: "under", objectEmoji: "🍄", objectName: "giant mushroom", targetPosition: {x: 200, y: 140}, explanation: "The dinosaur is protected under the mushroom!" },
-      { prep: "next to", objectEmoji: "🎁", objectName: "gift box", targetPosition: {x: 80, y: 140}, explanation: "The dinosaur is standing next to the gift!" },
-      { prep: "behind", objectEmoji: "📦", objectName: "large box", targetPosition: {x: 320, y: 140}, explanation: "The dinosaur is hidden behind the box!" },
-      { prep: "in front of", objectEmoji: "🪵", objectName: "fallen log", targetPosition: {x: 200, y: 160}, explanation: "The dinosaur is right in front of the log!" },
-      { prep: "on top of", objectEmoji: "🪨", objectName: "boulder", targetPosition: {x: 200, y: 30}, explanation: "The dinosaur is king of the boulder!" },
-      { prep: "near", objectEmoji: "🌳", objectName: "green tree", targetPosition: {x: 300, y: 140}, explanation: "The dinosaur is resting near the tree!" },
-      { prep: "beside", objectEmoji: "⛺", objectName: "camping tent", targetPosition: {x: 70, y: 140}, explanation: "The dinosaur is right beside the tent!" },
-      { prep: "under", objectEmoji: "🪵", objectName: "hollow log", targetPosition: {x: 200, y: 140}, explanation: "The dinosaur crept under the log!" },
-      { prep: "on top of", objectEmoji: "🍄", objectName: "mushroom cap", targetPosition: {x: 200, y: 30}, explanation: "The dinosaur balanced on top of the mushroom!" },
-      { prep: "next to", objectEmoji: "🌊", objectName: "stream", targetPosition: {x: 310, y: 140}, explanation: "The dinosaur is standing next to the stream!" },
-      { prep: "behind", objectEmoji: "⛺", objectName: "tent wall", targetPosition: {x: 60, y: 140}, explanation: "The dinosaur peeked from behind the tent!" },
-      { prep: "in front of", objectEmoji: "🌳", objectName: "forest tree", targetPosition: {x: 200, y: 160}, explanation: "The dinosaur is greeting everyone in front of the tree!" },
-      { prep: "near", objectEmoji: "📦", objectName: "cardboard box", targetPosition: {x: 90, y: 140}, explanation: "The dinosaur is hanging out near the box!" },
-      { prep: "under", objectEmoji: "☁️", objectName: "shade cloud", targetPosition: {x: 200, y: 140}, explanation: "The dinosaur is resting under the cloud's shadow!" },
-      { prep: "beside", objectEmoji: "🪨", objectName: "smooth stone", targetPosition: {x: 80, y: 140}, explanation: "The dinosaur is cozied up beside the stone!" }
+    const spanishNumbers = [
+      { num: 1, spanish: "uno", emoji: "🍎", options: ["uno", "dos", "tres"], explanation: "1 in Spanish is 'uno'!" },
+      { num: 2, spanish: "dos", emoji: "🌟", options: ["uno", "dos", "cuatro"], explanation: "2 in Spanish is 'dos'!" },
+      { num: 3, spanish: "tres", emoji: "🎈", options: ["tres", "cinco", "dos"], explanation: "3 in Spanish is 'tres'!" },
+      { num: 4, spanish: "cuatro", emoji: "🐶", options: ["seis", "cuatro", "uno"], explanation: "4 in Spanish is 'cuatro'!" },
+      { num: 5, spanish: "cinco", emoji: "⚽", options: ["cinco", "ocho", "tres"], explanation: "5 in Spanish is 'cinco'!" },
+      { num: 6, spanish: "seis", emoji: "🚗", options: ["siete", "seis", "diez"], explanation: "6 in Spanish is 'seis'!" },
+      { num: 7, spanish: "siete", emoji: "🐱", options: ["siete", "nueve", "cinco"], explanation: "7 in Spanish is 'siete'!" },
+      { num: 8, spanish: "ocho", emoji: "🍕", options: ["cuatro", "ocho", "doce"], explanation: "8 in Spanish is 'ocho'!" },
+      { num: 9, spanish: "nueve", emoji: "🍦", options: ["nueve", "diez", "siete"], explanation: "9 in Spanish is 'nueve'!" },
+      { num: 10, spanish: "diez", emoji: "⭐", options: ["diez", "once", "veinte"], explanation: "10 in Spanish is 'diez'!" },
+      { num: 11, spanish: "once", emoji: "🍪", options: ["doce", "once", "trece"], explanation: "11 in Spanish is 'once'!" },
+      { num: 12, spanish: "doce", emoji: "🍌", options: ["doce", "quince", "diez"], explanation: "12 in Spanish is 'doce'!" },
+      { num: 13, spanish: "trece", emoji: "🍓", options: ["catorce", "trece", "veinte"], explanation: "13 in Spanish is 'trece'!" },
+      { num: 14, spanish: "catorce", emoji: "🦆", options: ["catorce", "quince", "once"], explanation: "14 in Spanish is 'catorce'!" },
+      { num: 15, spanish: "quince", emoji: "🎁", options: ["dieciséis", "quince", "doce"], explanation: "15 in Spanish is 'quince'!" },
+      { num: 16, spanish: "dieciséis", emoji: "🚀", options: ["diecisiete", "dieciséis", "catorce"], explanation: "16 in Spanish is 'dieciséis'!" },
+      { num: 17, spanish: "diecisiete", emoji: "🎨", options: ["diecisiete", "diecinueve", "quince"], explanation: "17 in Spanish is 'diecisiete'!" },
+      { num: 18, spanish: "dieciocho", emoji: "🏀", options: ["dieciocho", "veinte", "seis"], explanation: "18 in Spanish is 'dieciocho'!" },
+      { num: 19, spanish: "diecinueve", emoji: "👑", options: ["diecinueve", "dieciséis", "once"], explanation: "19 in Spanish is 'diecinueve'!" },
+      { num: 20, spanish: "veinte", emoji: "💎", options: ["diez", "veinte", "trece"], explanation: "20 in Spanish is 'veinte'!" }
     ];
 
-    let missions = [];
+    let questions = [];
     let currentIndex = 0;
     let score = 0;
-
-    // Dragging state variables
-    let isDragging = false;
-    let dino, playground;
-    let startX = 0, startY = 0;
-    let dinoX = 30, dinoY = 20; // default position (bottom-left relative)
 
     function shuffleArray(array) {
       const arr = [...array];
@@ -203,108 +172,64 @@
       return arr;
     }
 
-    function initGame() {
-      missions = shuffleArray(prepositionBank);
-      currentIndex = 0;
-      score = 0;
-      setupDragging();
-      loadMission();
-    }
-
-    function loadMission() {
-      const m = missions[currentIndex];
-      document.getElementById('question-count').innerText = `Mission ${currentIndex + 1}/${missions.length}`;
-      document.getElementById('progress-bar').style.width = `${((currentIndex + 1) / missions.length) * 100}%`;
+    function loadQuestion() {
+      const q = questions[currentIndex];
+      document.getElementById('question-count').innerText = `Question ${currentIndex + 1}/${questions.length}`;
+      document.getElementById('progress-bar').style.width = `${((currentIndex + 1) / questions.length) * 100}%`;
       
-      document.getElementById('target-preposition').innerText = m.prep;
-      document.getElementById('scene-object').innerText = m.objectEmoji;
+      document.getElementById('big-number').innerText = q.num;
+      document.getElementById('question-text').innerText = `What is the Spanish word for ${q.num}?`;
 
-      // Position center object
-      const objEl = document.getElementById('scene-object');
-      objEl.style.left = '160px';
-      objEl.style.top = '70px';
+      const count = Math.min(q.num, 10);
+      document.getElementById('emoji-counter').innerText = Array(count).fill(q.emoji).join(" ") + (q.num > 10 ? ` ... (${q.num})` : "");
 
-      // Reset dinosaur to starting bottom-left corner
-      dinoX = 20;
-      dinoY = 150;
-      updateDinoPosition();
+      const container = document.getElementById('options-container');
+      container.innerHTML = '';
 
-      // Reset card animation
+      const shuffledOptions = shuffleArray(q.options);
+
+      shuffledOptions.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.onclick = () => handleAnswer(opt);
+        btn.className = "w-full bg-amber-50 hover:bg-amber-100 text-amber-950 font-extrabold p-4 rounded-2xl text-2xl shadow-md border-4 border-amber-200 btn-press capitalize flex items-center justify-between";
+        btn.innerHTML = `<span>${opt}</span> <i class="fa-solid fa-volume-low text-amber-400 text-lg" onclick="event.stopPropagation(); speakWord('${opt}')"></i>`;
+        container.appendChild(btn);
+      });
+
       const quizScreen = document.getElementById('quiz-screen');
       quizScreen.classList.remove('card-bounce');
       void quizScreen.offsetWidth;
       quizScreen.classList.add('card-bounce');
 
-      setTimeout(() => speakCurrentSentence(), 300);
+      setTimeout(() => speakCurrentQuestion(), 300);
     }
 
-    function updateDinoPosition() {
-      dino = document.getElementById('dinosaur');
-      dino.style.left = dinoX + 'px';
-      dino.style.top = dinoY + 'px';
+    function speakWord(word) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(word);
+        utterance.lang = 'es-ES';
+        utterance.rate = 0.85;
+        utterance.pitch = 1.1;
+        window.speechSynthesis.speak(utterance);
+      }
     }
 
-    // Touch & Mouse Drag Setup
-    function setupDragging() {
-      dino = document.getElementById('dinosaur');
-      playground = document.getElementById('playground');
-
-      // Mouse Events
-      dino.addEventListener('mousedown', startDrag);
-      document.addEventListener('mousemove', drag);
-      document.addEventListener('mouseup', endDrag);
-
-      // Touch Events for Tablets
-      dino.addEventListener('touchstart', startDrag, {passive: false});
-      document.addEventListener('touchmove', drag, {passive: false});
-      document.addEventListener('touchend', endDrag);
+    function speakCurrentQuestion() {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const q = questions[currentIndex];
+        const utterance = new SpeechSynthesisUtterance(`What is the Spanish word for ${q.num}? ${q.spanish}`);
+        utterance.rate = 0.85;
+        utterance.pitch = 1.1;
+        window.speechSynthesis.speak(utterance);
+      }
     }
 
-    function startDrag(e) {
-      isDragging = true;
-      const clientX = e.clientX || e.touches[0].clientX;
-      const clientY = e.clientY || e.touches[0].clientY;
-      
-      startX = clientX - dinoX;
-      startY = clientY - dinoY;
-      e.preventDefault();
-    }
-
-    function drag(e) {
-      if (!isDragging) return;
-      const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
-      const clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
-
-      const pRect = playground.getBoundingClientRect();
-      
-      // Calculate new position inside playground bounds
-      dinoX = clientX - startX;
-      dinoY = clientY - startY;
-
-      // Constrain inside playground box boundaries
-      const maxW = playground.clientWidth - 70;
-      const maxH = playground.clientHeight - 70;
-      
-      dinoX = Math.max(10, Math.min(dinoX, maxW));
-      dinoY = Math.max(10, Math.min(dinoY, maxH));
-
-      updateDinoPosition();
-    }
-
-    function endDrag() {
-      isDragging = false;
-    }
-
-    // Check position correctness
-    function checkPosition() {
-      const m = missions[currentIndex];
-      const target = m.targetPosition;
-
-      // Check distance from target coordinates
-      const distance = Math.hypot(dinoX - target.x, dinoY - target.y);
-      
-      // Generous threshold for kids to drop correctly (within 70 pixels)
-      const isCorrect = distance < 75;
+    function handleAnswer(selectedOpt) {
+      window.speechSynthesis?.cancel();
+      const q = questions[currentIndex];
+      const isCorrect = selectedOpt === q.spanish;
 
       const modal = document.getElementById('feedback-modal');
       const icon = document.getElementById('feedback-icon');
@@ -314,29 +239,29 @@
       if (isCorrect) {
         score++;
         icon.innerText = "⭐";
-        title.innerText = "Super Star!";
+        title.innerText = "¡Excelente!";
         title.className = "text-3xl font-extrabold text-green-600 mb-2";
-        msg.innerText = m.explanation;
-        confetti({ particleCount: 60, spread: 70, origin: { y: 0.7 } });
-        playTone(523.25, 0.25);
-        speakText(m.explanation);
+        msg.innerText = q.explanation;
+        confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
+        playTone(523.25, 0.2);
+        speakWord(q.spanish);
       } else {
         icon.innerText = "💡";
-        title.innerText = "Close Try!";
+        title.innerText = "Good Try!";
         title.className = "text-3xl font-extrabold text-orange-500 mb-2";
-        msg.innerText = `To be ${m.prep} the ${m.objectName}, try placing the dinosaur closer! ${m.explanation}`;
+        msg.innerText = `${q.num} in Spanish is "${q.spanish}". ${q.explanation}`;
         playTone(220.00, 0.3);
-        speakText(m.explanation);
+        speakWord(q.spanish);
       }
 
       modal.classList.remove('hidden');
     }
 
-    function nextMission() {
+    function nextQuestion() {
       document.getElementById('feedback-modal').classList.add('hidden');
       currentIndex++;
-      if (currentIndex < missions.length) {
-        loadMission();
+      if (currentIndex < questions.length) {
+        loadQuestion();
       } else {
         showResults();
       }
@@ -344,48 +269,29 @@
 
     function showResults() {
       document.getElementById('quiz-screen').classList.add('hidden');
-      document.getElementById('question-count').innerText = "Complete!";
+      document.getElementById('question-count').innerText = "Finished!";
       document.getElementById('speaker-btn').classList.add('hidden');
       document.getElementById('results-screen').classList.remove('hidden');
 
-      document.getElementById('final-score').innerText = `${score} / ${missions.length}`;
+      document.getElementById('final-score').innerText = `${score} / ${questions.length}`;
 
       const stars = document.getElementById('star-rating');
-      if (score === 25) stars.innerText = "⭐⭐⭐⭐⭐ Master Explorer!";
-      else if (score >= 20) stars.innerText = "⭐⭐⭐⭐ Great Job!";
-      else if (score >= 12) stars.innerText = "⭐⭐⭐ Good Effort!";
+      if (score === 20) stars.innerText = "⭐⭐⭐⭐⭐ Perfect Score!";
+      else if (score >= 16) stars.innerText = "⭐⭐⭐⭐ ¡Muy Bien!";
+      else if (score >= 10) stars.innerText = "⭐⭐⭐ Good Effort!";
       else stars.innerText = "⭐ Keep Practicing!";
 
-      confetti({ particleCount: 150, spread: 110, origin: { y: 0.5 } });
-      speakText(`Fantastic job! You finished all preposition missions with a score of ${score} out of 25!`);
+      confetti({ particleCount: 120, spread: 100, origin: { y: 0.5 } });
     }
 
-    function restartAdventure() {
+    function restartQuiz() {
+      currentIndex = 0;
+      score = 0;
+      questions = shuffleArray(spanishNumbers);
       document.getElementById('speaker-btn').classList.remove('hidden');
       document.getElementById('results-screen').classList.add('hidden');
       document.getElementById('quiz-screen').classList.remove('hidden');
-      initGame();
-    }
-
-    function speakCurrentSentence() {
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const m = missions[currentIndex];
-        const utterance = new SpeechSynthesisUtterance(`Move the dinosaur ${m.prep} the ${m.objectName}!`);
-        utterance.rate = 0.85;
-        utterance.pitch = 1.1;
-        window.speechSynthesis.speak(utterance);
-      }
-    }
-
-    function speakText(text) {
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = 0.9;
-        utterance.pitch = 1.1;
-        window.speechSynthesis.speak(utterance);
-      }
+      loadQuestion();
     }
 
     function playTone(freq, duration) {
@@ -403,7 +309,8 @@
     }
 
     window.onload = function() {
-      initGame();
+      questions = shuffleArray(spanishNumbers);
+      loadQuestion();
     };
   </script>
 </body>
