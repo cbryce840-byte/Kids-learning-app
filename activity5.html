@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Activity 5: Comparing Sets</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Fredoka', cursive, sans-serif;
+      background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #feada6 100%);
+      min-height: 100vh;
+      user-select: none;
+      -webkit-user-select: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      margin: 0;
+    }
+    .card-bounce {
+      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.9); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .btn-press:active {
+      transform: scale(0.95);
+    }
+    .set-box {
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .set-box:active {
+      transform: scale(0.98);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Main Container -->
+  <div id="app" class="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-purple-400 relative min-h-[580px] max-h-[95vh] flex flex-col justify-between p-4">
+    
+    <!-- Header -->
+    <div>
+      <div class="flex items-center justify-between mb-2">
+        <a href="index.html" class="bg-gray-800 text-white font-bold px-3 py-1 rounded-xl text-sm shadow">
+          🏠 Home
+        </a>
+        <span id="question-count" class="bg-purple-100 text-purple-900 font-bold px-3 py-1 rounded-full text-sm border border-purple-300">
+          Mission 1/30
+        </span>
+        <button id="speaker-btn" onclick="speakCurrentQuestion()" class="bg-yellow-400 hover:bg-yellow-300 text-yellow-950 font-bold px-3 py-1 rounded-xl flex items-center gap-1 shadow border border-yellow-500">
+          <i class="fa-solid fa-volume-high text-sm"></i>
+          <span class="text-xs">Listen</span>
+        </button>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="w-full bg-gray-200 h-2.5 rounded-full overflow-hidden border border-gray-300 mb-2">
+        <div id="progress-bar" class="bg-gradient-to-r from-purple-400 to-pink-500 h-full w-1/30 transition-all duration-300"></div>
+      </div>
+    </div>
+
+    <!-- Main Gameplay Area -->
+    <div id="quiz-screen" class="card-bounce flex-grow flex flex-col justify-between items-center text-center">
+      
+      <!-- Question Prompt -->
+      <div class="bg-purple-50 border-2 border-purple-200 rounded-xl p-3 w-full shadow-inner mb-2">
+        <p class="text-purple-950 font-extrabold text-lg sm:text-xl leading-tight" id="question-prompt">
+          Which group has <span id="target-mode" class="text-pink-600 underline decoration-yellow-400 decoration-4">MORE</span>?
+        </p>
+      </div>
+
+      <!-- Two Comparison Sets Container -->
+      <div class="w-full flex flex-col gap-3 my-auto">
+        
+        <!-- Set A -->
+        <button onclick="selectSet('A')" class="set-box w-full bg-amber-50 border-4 border-amber-300 hover:border-amber-400 rounded-2xl p-3 flex flex-col items-center shadow-md text-left">
+          <div class="w-full flex justify-between items-center mb-1 border-b border-amber-200 pb-1">
+            <span class="font-black text-amber-800 text-sm tracking-wide">GROUP A</span>
+            <span id="label-count-a" class="hidden text-xs bg-amber-200 text-amber-900 font-bold px-2 py-0.5 rounded-full">3 items</span>
+          </div>
+          <div id="set-a-items" class="flex flex-wrap justify-center gap-2 text-3xl sm:text-4xl min-h-[50px] items-center">
+            🍎 🍎 🍎
+          </div>
+        </button>
+
+        <!-- Set B -->
+        <button onclick="selectSet('B')" class="set-box w-full bg-sky-50 border-4 border-sky-300 hover:border-sky-400 rounded-2xl p-3 flex flex-col items-center shadow-md text-left">
+          <div class="w-full flex justify-between items-center mb-1 border-b border-sky-200 pb-1">
+            <span class="font-black text-sky-800 text-sm tracking-wide">GROUP B</span>
+            <span id="label-count-b" class="hidden text-xs bg-sky-200 text-sky-900 font-bold px-2 py-0.5 rounded-full">5 items</span>
+          </div>
+          <div id="set-b-items" class="flex flex-wrap justify-center gap-2 text-3xl sm:text-4xl min-h-[50px] items-center">
+            🍌 🍌 🍌 🍌 🍌
+          </div>
+        </button>
+
+        <!-- Equal Button (Only active during "EQUAL" missions) -->
+        <button id="equal-btn" onclick="selectSet('EQUAL')" class="w-full bg-emerald-50 border-4 border-emerald-400 hover:bg-emerald-100 font-extrabold text-emerald-800 py-3 rounded-2xl text-lg shadow-md btn-press hidden">
+          🤝 They are BOTH EQUAL!
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- Feedback Modal -->
+    <div id="feedback-modal" class="hidden absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-30">
+      <div id="feedback-card" class="bg-white rounded-3xl p-5 text-center max-w-xs w-full border-4 border-yellow-400 shadow-2xl card-bounce flex flex-col items-center">
+        <div id="feedback-icon" class="text-5xl mb-2">⭐</div>
+        <h3 id="feedback-title" class="text-2xl font-extrabold text-gray-800 mb-1">Super Job!</h3>
+        <p id="feedback-msg" class="text-base text-gray-600 mb-4 leading-snug">You compared the groups correctly!</p>
+        
+        <button onclick="nextMission()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 text-lg rounded-xl shadow-md border-b-4 border-purple-800 btn-press">
+          Next ➔
+        </button>
+      </div>
+    </div>
+
+    <!-- Final Score Screen -->
+    <div id="results-screen" class="hidden flex-grow flex flex-col items-center justify-center text-center p-2 card-bounce">
+      <div class="text-6xl mb-2">🏆</div>
+      <h2 class="text-2xl font-extrabold text-purple-900 mb-1">Math Master!</h2>
+      <p class="text-base text-gray-600 mb-3">You completed all 30 set comparisons!</p>
+      
+      <div class="bg-purple-50 rounded-xl p-4 w-full border-2 border-purple-200 mb-4">
+        <div class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Your Score</div>
+        <div id="final-score" class="text-4xl font-black text-purple-600">30 / 30</div>
+        <div id="star-rating" class="text-2xl mt-1">⭐⭐⭐⭐⭐</div>
+      </div>
+
+      <button onclick="restartAdventure()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-extrabold py-3 rounded-xl text-xl shadow-lg border-b-4 border-yellow-600 btn-press flex items-center justify-center gap-2">
+        <i class="fa-solid fa-rotate-right"></i> Play Again!
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    const emojiItems = [
+      { name: "apple", emoji: "🍎" },
+      { name: "banana", emoji: "🍌" },
+      { name: "star", emoji: "⭐️" },
+      { name: "car", emoji: "🚗" },
+      { name: "balloon", emoji: "🎈" },
+      { name: "dinosaur", emoji: "🦖" },
+      { name: "cookie", emoji: "🍪" },
+      { name: "fish", emoji: "🐟" },
+      { name: "flower", emoji: "🌸" }
+    ];
+
+    // Bank of 30 distinct set-comparison scenarios
+    const rawMissions = [
+      { mode: "MORE", countA: 5, countB: 2, itemA: 0, itemB: 1 },
+      { mode: "FEWER", countA: 3, countB: 6, itemA: 2, itemB: 3 },
+      { mode: "MORE", countA: 4, countB: 8, itemA: 4, itemB: 5 },
+      { mode: "FEWER", countA: 7, countB: 2, itemA: 6, itemB: 7 },
+      { mode: "EQUAL", countA: 4, countB: 4, itemA: 8, itemB: 0 },
+      { mode: "MORE", countA: 6, countB: 3, itemA: 1, itemB: 2 },
+      { mode: "FEWER", countA: 2, countB: 5, itemA: 3, itemB: 4 },
+      { mode: "MORE", countA: 9, countB: 4, itemA: 5, itemB: 6 },
+      { mode: "EQUAL", countA: 6, countB: 6, itemA: 7, itemB: 8 },
+      { mode: "FEWER", countA: 1, countB: 4, itemA: 0, itemB: 2 },
+      { mode: "MORE", countA: 7, countB: 5, itemA: 3, itemB: 1 },
+      { mode: "FEWER", countA: 4, countB: 9, itemA: 5, itemB: 4 },
+      { mode: "MORE", countA: 8, countB: 3, itemA: 7, itemB: 6 },
+      { mode: "EQUAL", countA: 3, countB: 3, itemA: 2, itemB: 8 },
+      { mode: "FEWER", countA: 5, countB: 8, itemA: 1, itemB: 0 },
+      { mode: "MORE", countA: 6, countB: 2, itemA: 4, itemB: 3 },
+      { mode: "FEWER", countA: 2, countB: 7, itemA: 6, itemB: 5 },
+      { mode: "EQUAL", countA: 5, countB: 5, itemA: 8, itemB: 7 },
+      { mode: "MORE", countA: 10, countB: 6, itemA: 0, itemB: 4 },
+      { mode: "FEWER", countA: 3, countB: 7, itemA: 2, itemB: 1 },
+      { mode: "MORE", countA: 5, countB: 1, itemA: 3, itemB: 5 },
+      { mode: "EQUAL", countA: 7, countB: 7, itemA: 6, itemB: 2 },
+      { mode: "FEWER", countA: 4, countB: 6, itemA: 7, itemB: 0 },
+      { mode: "MORE", countA: 8, countB: 5, itemA: 8, itemB: 3 },
+      { mode: "FEWER", countA: 1, countB: 5, itemA: 4, itemB: 6 },
+      { mode: "MORE", countA: 7, countB: 3, itemA: 1, itemB: 7 },
+      { mode: "EQUAL", countA: 8, countB: 8, itemA: 2, itemB: 4 },
+      { mode: "FEWER", countA: 5, countB: 9, itemA: 5, itemB: 8 },
+      { mode: "MORE", countA: 9, countB: 2, itemA: 0, itemB: 3 },
+      { mode: "EQUAL", countA: 2, countB: 2, itemA: 6, itemB: 1 }
+    ];
+
+    let missions = [];
+    let currentIndex = 0;
+    let score = 0;
+
+    function shuffle(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function initGame() {
+      missions = shuffle(rawMissions);
+      currentIndex = 0;
+      score = 0;
+      loadMission();
+    }
+
+    function loadMission() {
+      const m = missions[currentIndex];
+      document.getElementById('question-count').innerText = `Mission ${currentIndex + 1}/${missions.length}`;
+      document.getElementById('progress-bar').style.width = `${((currentIndex + 1) / missions.length) * 100}%`;
+
+      const modeEl = document.getElementById('target-mode');
+      const equalBtn = document.getElementById('equal-btn');
+
+      if (m.mode === "MORE") {
+        modeEl.innerText = "MORE";
+        modeEl.className = "text-pink-600 underline decoration-yellow-400 decoration-4";
+        equalBtn.classList.add('hidden');
+      } else if (m.mode === "FEWER") {
+        modeEl.innerText = "FEWER";
+        modeEl.className = "text-blue-600 underline decoration-yellow-400 decoration-4";
+        equalBtn.classList.add('hidden');
+      } else {
+        modeEl.innerText = "EQUAL (SAME)";
+        modeEl.className = "text-emerald-600 underline decoration-yellow-400 decoration-4";
+        equalBtn.classList.remove('hidden');
+      }
+
+      // Render Set A
+      const itemA = emojiItems[m.itemA];
+      const setAContainer = document.getElementById('set-a-items');
+      setAContainer.innerHTML = Array(m.countA).fill(itemA.emoji).join(' ');
+
+      // Render Set B
+      const itemB = emojiItems[m.itemB];
+      const setBContainer = document.getElementById('set-b-items');
+      setBContainer.innerHTML = Array(m.countB).fill(itemB.emoji).join(' ');
+
+      // Animate card entrance
+      const quizScreen = document.getElementById('quiz-screen');
+      quizScreen.classList.remove('card-bounce');
+      void quizScreen.offsetWidth;
+      quizScreen.classList.add('card-bounce');
+
+      setTimeout(() => speakCurrentQuestion(), 300);
+    }
+
+    function selectSet(choice) {
+      const m = missions[currentIndex];
+      let correctChoice = "";
+
+      if (m.mode === "EQUAL") {
+        correctChoice = "EQUAL";
+      } else if (m.mode === "MORE") {
+        correctChoice = m.countA > m.countB ? "A" : "B";
+      } else if (m.mode === "FEWER") {
+        correctChoice = m.countA < m.countB ? "A" : "B";
+      }
+
+      const isCorrect = choice === correctChoice;
+      const modal = document.getElementById('feedback-modal');
+      const icon = document.getElementById('feedback-icon');
+      const title = document.getElementById('feedback-title');
+      const msg = document.getElementById('feedback-msg');
+
+      if (isCorrect) {
+        score++;
+        icon.innerText = "⭐";
+        title.innerText = "Super Star!";
+        title.className = "text-2xl font-extrabold text-green-600 mb-1";
+        
+        if (m.mode === "EQUAL") {
+          msg.innerText = `Great eyes! Group A and Group B both have ${m.countA} items!`;
+        } else if (m.mode === "MORE") {
+          const winnerCount = Math.max(m.countA, m.countB);
+          msg.innerText = `Awesome! Group ${choice} has ${winnerCount} items, which is more!`;
+        } else {
+          const winnerCount = Math.min(m.countA, m.countB);
+          msg.innerText = `Correct! Group ${choice} has ${winnerCount} items, which is fewer!`;
+        }
+
+        confetti({ particleCount: 60, spread: 70, origin: { y: 0.7 } });
+        playTone(523.25, 0.25);
+        speakText(msg.innerText);
+      } else {
+        icon.innerText = "💡";
+        title.innerText = "Nice Try!";
+        title.className = "text-2xl font-extrabold text-orange-500 mb-1";
+        msg.innerText = `Group A has ${m.countA} items and Group B has ${m.countB} items. Give it another thought on the next one!`;
+        playTone(220.00, 0.3);
+        speakText(msg.innerText);
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function nextMission() {
+      document.getElementById('feedback-modal').classList.add('hidden');
+      currentIndex++;
+      if (currentIndex < missions.length) {
+        loadMission();
+      } else {
+        showResults();
+      }
+    }
+
+    function showResults() {
+      document.getElementById('quiz-screen').classList.add('hidden');
+      document.getElementById('question-count').innerText = "Complete!";
+      document.getElementById('speaker-btn').classList.add('hidden');
+      document.getElementById('results-screen').classList.remove('hidden');
+
+      document.getElementById('final-score').innerText = `${score} / ${missions.length}`;
+
+      const stars = document.getElementById('star-rating');
+      if (score === 30) stars.innerText = "⭐⭐⭐⭐⭐ Set Comparison Master!";
+      else if (score >= 24) stars.innerText = "⭐⭐⭐⭐ Great Job!";
+      else if (score >= 15) stars.innerText = "⭐⭐⭐ Good Effort!";
+      else stars.innerText = "⭐ Keep Practicing!";
+
+      confetti({ particleCount: 150, spread: 110, origin: { y: 0.5 } });
+      speakText(`Awesome job Dillon! You completed all 30 set comparisons with a score of ${score} out of 30!`);
+    }
+
+    function restartAdventure() {
+      document.getElementById('speaker-btn').classList.remove('hidden');
+      document.getElementById('results-screen').classList.add('hidden');
+      document.getElementById('quiz-screen').classList.remove('hidden');
+      initGame();
+    }
+
+    function speakCurrentQuestion() {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const m = missions[currentIndex];
+        let text = `Which group has ${m.mode}?`;
+        if (m.mode === "EQUAL") text = "Are the two groups equal?";
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 0.85;
+        utterance.pitch = 1.1;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    function speakText(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 0.9;
+        utterance.pitch = 1.1;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    function playTone(freq, duration) {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.frequency.value = freq;
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    window.onload = function() {
+      initGame();
+    };
+  </script>
+</body>
+</html>
